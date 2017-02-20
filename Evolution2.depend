@@ -1,0 +1,39 @@
+# depslib dependency file v1.0
+1487614974 source:c:\users\android\desktop\evolution2\main.cpp
+	<SDL.h>
+	<conio.h>
+	"mysdl.h"
+	"debug.h"
+	"world.h"
+	"release.h"
+
+1487595971 source:c:\users\android\desktop\evolution2\debug.cpp
+	<iostream>
+	"debug.h"
+
+1487605428 c:\users\android\desktop\evolution2\debug.h
+	<string>
+
+1487596680 c:\users\android\desktop\evolution2\release.h
+	<string>
+
+1487608418 source:c:\users\android\desktop\evolution2\mysdl.cpp
+	<SDL.h>
+	<cstdlib>
+	<string>
+	"debug.h"
+	"release.h"
+	"mysdl.h"
+
+1487608156 c:\users\android\desktop\evolution2\mysdl.h
+	<SDL.h>
+	<string>
+
+1487615355 source:c:\users\android\desktop\evolution2\world.cpp
+	<cstdlib>
+	"world.h"
+	"mysdl.h"
+
+1487615636 c:\users\android\desktop\evolution2\world.h
+	"mysdl.h"
+
