@@ -10,12 +10,13 @@ extern SDL_Window* gWindow;
 extern SDL_Renderer* renderer;
 
 struct SDL_Image {
+    SDL_Texture* texture;
     int32_t width;
     int32_t height;
-    SDL_Texture* texture;
 };
 
 bool init(std::string TITLE = "BLANK");
 SDL_Image* load(std::string IMAGE);
+SDL_Image* load_trsp(std::string IMAGE, SDL_Color BACKGROUND = {0, 0xFF, 0});
 bool printg(SDL_Image* IMAGE, int16_t X, int16_t Y);
 void SDL_DestroyImage(SDL_Image* IMAGE);

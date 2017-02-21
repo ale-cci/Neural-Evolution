@@ -56,3 +56,25 @@ void SDL_DestroyImage(SDL_Image* IMAGE) {
         IMAGE->height = 0;
     }
 }
+
+SDL_Image* load_trsp(std::string PATH, SDL_Color C) {
+    SDL_Image img;
+    SDL_Surface* tmp = SDL_LoadBMP(PATH.c_str());
+    if (tmp == NULL) {
+        std::string errmsg = std::string("") + "error while opening: " + PATH.c_str();
+        warning("LOAD_TRASP", errmsg.c_str());
+        return NULL;
+    }
+    SDL_SetColorKey(tmp, SDL_TRUE, SDL_MapRGB(tmp->format, C.r, C.g, C.b));
+
+    img.texture = SDL_CreateTextureFromSurface(renderer, tmp);
+    img.width = tmp->w;
+    img.height = tmp->h;
+
+    if (img.texture == NULL) {
+        warning("LOAD_TRASP", "error converting surface to texture");
+        exit(1);
+    }
+    SDL_FreeSurface(tmp);
+    return &img;
+}
