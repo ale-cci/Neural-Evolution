@@ -10,9 +10,9 @@ extern SDL_Window* gWindow;
 extern SDL_Renderer* renderer;
 
 struct SDL_Image {
-    SDL_Texture* texture;
     int32_t width;
     int32_t height;
+    SDL_Texture* texture;
 };
 
 bool init(std::string TITLE = "BLANK");

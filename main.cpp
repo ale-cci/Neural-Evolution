@@ -4,16 +4,20 @@
 #include "debug.h"
 #include "world.h"
 #include "release.h"
+#include "agent.h"
+
 
 int main (int argc, char* args[]) {
     bool show_background = false;
     SDL_Event event;
-    if (init()) {
+
+    if (init("EVOLUTION SIMULATOR")) {
         warning ("MAIN THREAD", "error on initializing, terminating process");
         return 0;
     }
     init_food();
-    SDL_Image* image = load("IMAGES/default.bmp");
+    init_agent("IMAGES/agent00.bmp");
+
     for (bool quit = false; quit == false; ) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT)
@@ -30,8 +34,6 @@ int main (int argc, char* args[]) {
                         break;
                 }
         }
-        if (image == NULL)
-            warning("IMAGE", "IMAGE NOT LOADED");
 
         // rederer background color
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -39,11 +41,14 @@ int main (int argc, char* args[]) {
         printworld(show_background);
         //printg(image, 10, 10);
         SDL_RenderPresent(renderer);
+        SDL_Delay(PAUSE_DELAY);
     }
 
+    //SDL_DestroyImage(image);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(gWindow);
-    SDL_DestroyImage(image);
+    gWindow = NULL;
+    renderer = NULL;
     SDL_Quit();
     warning("QUITTING", "DONE");
     return 0;
