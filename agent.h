@@ -1,5 +1,6 @@
 #pragma once
 #include <inttypes.h>
+#include "extmath.h"
 #include "neural_network.h"
 
 const static double AGENT_MASS     = 1.0;
@@ -8,10 +9,7 @@ const static int AGENT_GREEN    = 206;
 const static int AGENT_BLUE     = 209;
 const static double MAX_SPEED   = 1.0;
 extern SDL_Image agent_texture;
-struct COORD {
-    double X;
-    double Y;
-};
+
 
 struct AGENT {
     double X;
@@ -38,4 +36,4 @@ void eat(AGENT* _agent);
 int32_t getcellX(AGENT * _agent);
 int32_t getcellY(AGENT * _agent);
 int32_t get_neightbours(AGENT* _agent);
-COORD centerof(AGENT* _agent);
+COORD getcenter(AGENT* _agent);

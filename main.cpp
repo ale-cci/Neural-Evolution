@@ -2,12 +2,12 @@
 #include <time.h>
 #include <conio.h>
 #include <iostream>
+#include <cstdlib>
 
 #include "mysdl.h"
-#include "debug.h"
+#include "generic_functions.h"
 #include "world.h"
-#include "release.h"
-#include "agent.h"
+#include "generic_functions.h"
 
 
 int main (int argc, char* args[]) {
@@ -34,7 +34,7 @@ int main (int argc, char* args[]) {
                 switch (event.key.keysym.sym) {
                         // do something
                     case SDLK_i:
-                        agent[0].f_left  = (!agent[0].f_left) * 3;
+                        agent[0].f_left  = (!agent[0].f_left) * 5;
                         break;
                     case SDLK_p:
                         agent[0].f_right = (!agent[0].f_right) * 5;
@@ -58,12 +58,14 @@ int main (int argc, char* args[]) {
         SDL_RenderClear(renderer);
         if (show_background)
             printworld();
-        //printg(image, 10, 10);
-        //move_agents();
+
+        move_agents();
         //std::cout << agent[0].X << " " << agent[0].Y << std::endl;
-        //print_agents();
-        moveagent(&agent[0]);
-        printagent(&agent[0]);
+        //moveagent(&agent[0]);
+        print_agents();
+        give_agent_input(&agent[0]);
+        //printagent(&agent[1]);
+        //printagent(&agent[0]);
         SDL_RenderPresent(renderer);
         SDL_Delay(PAUSE_DELAY);
     }

@@ -1,25 +1,17 @@
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
-#include "debug.h"
-#include "release.h"
+#include "generic_functions.h"
 #include "world.h"
 #include "mysdl.h"
+#include "extmath.h"
 #include "agent.h"
 
 SDL_Image agent_texture;
 
-void printagent(AGENT* agent) {
-    SDL_SetTextureColorMod(agent_texture.texture, AGENT_RED, AGENT_GREEN, AGENT_BLUE);
-    SDL_Rect rekt = {(int) agent->X,(int) agent->Y, agent_texture.width, agent_texture.height};
-    SDL_Point pnt = {agent_texture.width/2, agent_texture.height/4};
-    SDL_RenderCopyEx(renderer, agent_texture.texture,NULL, &rekt, agent->rotation, &pnt , SDL_FLIP_NONE);
-    //printg(&agent_texture, agent->X, agent->Y);
-}
-
 AGENT* makeagent() {
     AGENT agent;
-    agent_texture = *load_trsp("IMAGES/debug00.bmp");
+    agent_texture = *load_trsp("IMAGES/debug01.bmp");
     agent.energy = rand(0, 100);
     agent.rotation = rand(0,360);
     agent.f_left = 0;
@@ -46,7 +38,7 @@ void moveagent(AGENT* agnt) {
     else
     if (agnt->rotation < 0)
         agnt->rotation += 360;
-    std::cout << moveX << " " << moveY << " " << acceleration << std::endl;
+    //std::cout << moveX << " " << moveY << " " << acceleration << std::endl;
     //agnt->speed = acceleration + agnt->speed;
     //agnt->boost_strenght -= distance;
 
@@ -56,14 +48,13 @@ int32_t getcellX(AGENT * _agent) {
 }
 int32_t getcellY(AGENT * _agent) {
     // TODO change this to height/2
-    return (_agent->Y + agent_texture.height/4)/ SQUARE_SIZE;
+    return (_agent->Y + agent_texture.height/2)/ SQUARE_SIZE;
 }
 void eat(AGENT* _agent) {
     _agent->energy--;
 
     int32_t cellX = getcellX(_agent);
     int32_t cellY = getcellY(_agent);
-    std::cout << cellX << " " << cellY << std::endl;
     if (area[cellY][cellX] > 0) {
         _agent->energy += 5;
         area[cellY][cellX] --;
@@ -81,32 +72,58 @@ int32_t get_neightbours(AGENT* _agent) {
 bool in_agent(COORD P, AGENT* _agent) {
     return pow((P.X - _agent->X), 2) + pow((P.Y - _agent->Y), 2) <= pow(agent_texture.width/2, 2);
 }
-SDL_Color look(COORD P, double direction) {
-    // FIXME if tan(90)
-    while (direction < 0)
-        direction += 360;
-    while (direction >= 360)
-        direction -= 360;
-
+SDL_Color look(AGENT *_agent, double direction) {
+    while(_agent->rotation < 0)
+        _agent->rotation += 360;
+    while(_agent->rotation >= 360)
+        _agent->rotation -=360;
+    // FIXME tan(90)
+    COORD P = getcenter(_agent);
+    double m_line = tan(direction);
+    double q_line = -tan(direction) * P.X + P.Y;
     SDL_Color result = {0, 0, 0, 255};
-    int8_t facing = (tan(direction) > 0)? 1 : -1;
-    for (double x = 0; x <= AGENT_SEEN_RADIUS * cos(direction); x += 0.1) {
 
-        double y = tan(direction) * x;
-        for (int i = 0; i < POPULATION_COUNT; ++i)
-            if (in_agent({P.X + x * facing, P.Y + y * facing }, &agent[i])) {
-                result.r = AGENT_RED;
-                result.g = AGENT_GREEN;
-                result.b = AGENT_BLUE;
-                result.a = sqrt(x * x + y * y);
-                return result;
-            }
+    #ifdef DEBUG
+    SDL_SetRenderDrawColor(renderer, 0xff, 0, 0, 0);
+    SDL_RenderDrawLine(renderer, P.X, P.Y, P.X + AGENT_SEEN_RADIUS * cos(direction),m_line * (P.X + AGENT_SEEN_RADIUS * cos(direction)) + q_line);
+    #endif // DEBUG
+    COORD collisions[2];
+    uint8_t number_of_collisions;
+    double dist = 0;
+    for (int i = 1; i <POPULATION_COUNT; ++i) {
+        line_circle_collision(m_line, q_line, getcenter(&agent[i]).X, getcenter(&agent[i]).Y, agent_texture.width/2, collisions, &number_of_collisions);
+
+        if (number_of_collisions == 0)
+            continue;
+        dist = std::min(distance(&collisions[0], &P), distance(&collisions[1], &P));
+
+        if (dist <= AGENT_SEEN_RADIUS ) {
+            // FIXME set rotation interval to 0,360
+            if ((_agent->rotation > 270) && (_agent->rotation < 90))
+                if (collisions[0].Y > P.Y)
+                    continue;
+            if ((_agent->rotation > 90) && (_agent->rotation < 270))
+                if (collisions[0].Y < P.Y)
+                    continue;
+            if (_agent->rotation == 90)
+                if (collisions[0].X < P.X)
+                    continue;
+            if (_agent->rotation == 270)
+                if (collisions[0].X > P.X)
+                    continue;
+            for (int i = 0; i < number_of_collisions; ++i)
+            std::cout << "{" << collisions[0].Y << " " << P.Y << "}" << "[" << _agent->rotation << "] " ;
+            result.r = AGENT_RED;
+            result.g = AGENT_GREEN;
+            result.b = AGENT_BLUE;
+            break;
+        }
     }
     return result;
 }
 
-COORD centerof(AGENT* _agent) {
-    return {_agent->X + agent_texture.width/2, agent->Y + agent_texture.height/2};
+COORD getcenter(AGENT* _agent) {
+    return {_agent->X + agent_texture.width/2, _agent->Y + agent_texture.height/2};
 }
 
 void give_agent_input(AGENT * _agent) {
@@ -116,10 +133,12 @@ void give_agent_input(AGENT * _agent) {
     double health = _agent->energy;
     double foodeyeleft, foodeyeright;
 
-    SDL_Color left_eye = look(centerof(_agent), 60 - _agent->rotation),
-            right_eye  = look(centerof(_agent), 60 + _agent->rotation);
+    SDL_Color left_eye = look(_agent, (120 + _agent->rotation + 90)* PI / 180);
+    SDL_Color right_eye  = look(_agent, (240 + _agent->rotation + 90)* PI / 180);
+    std::cout << " " <<(int)left_eye.b << " " << (int)right_eye.b << " " << std::endl;
    // bool collision = in_agent({x + _agent->X + agent_texture.width / 2, y + _agent->Y + agent_texture.height / 2}, _agent);
 
     _PRECISION inputs[INPUT_CELLS] = {food, neightbours, health};
     _agent->brain.input(inputs);
 }
+

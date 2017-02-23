@@ -1,7 +1,6 @@
 #pragma once
+#include "generic_functions.h"
 #include "neural_network_constant.h"
-#include "debug.h"
-#include "release.h"
 
 struct NEURON {
     int input_nums = 0;

@@ -1,6 +1,5 @@
 #include <cstdlib>
-#include "debug.h"
-#include "release.h"
+#include "generic_functions.h"
 #include "world.h"
 #include "mysdl.h"
 #include "agent.h"

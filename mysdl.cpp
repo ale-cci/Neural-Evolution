@@ -1,8 +1,7 @@
 #include <SDL.h>
 #include <cstdlib> // for exit
 #include <string>
-#include "debug.h"
-#include "release.h"
+#include "generic_functions.h"
 #include "mysdl.h"
 
 SDL_Window* gWindow = NULL;
