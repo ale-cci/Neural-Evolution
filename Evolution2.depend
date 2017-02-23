@@ -1,19 +1,20 @@
 # depslib dependency file v1.0
-1487708616 source:c:\users\android\desktop\evolution2\main.cpp
+1487808642 source:c:\users\android\desktop\evolution2\main.cpp
 	<SDL.h>
 	<time.h>
 	<conio.h>
+	<iostream>
 	"mysdl.h"
 	"debug.h"
 	"world.h"
 	"release.h"
 	"agent.h"
 
-1487697763 source:c:\users\android\desktop\evolution2\debug.cpp
+1487775424 source:c:\users\android\desktop\evolution2\debug.cpp
 	<iostream>
 	"debug.h"
 
-1487708124 c:\users\android\desktop\evolution2\debug.h
+1487775349 c:\users\android\desktop\evolution2\debug.h
 	<string>
 	<cstdlib>
 
@@ -40,15 +41,16 @@
 	"mysdl.h"
 	"agent.h"
 
-1487709136 c:\users\android\desktop\evolution2\world.h
+1487786407 c:\users\android\desktop\evolution2\world.h
 	<vector>
 	"mysdl.h"
 	"agent.h"
 
-1487708319 c:\users\android\desktop\evolution2\agent.h
+1487808857 c:\users\android\desktop\evolution2\agent.h
 	<inttypes.h>
+	"neural_network.h"
 
-1487709000 source:c:\users\android\desktop\evolution2\agent.cpp
+1487808273 source:c:\users\android\desktop\evolution2\agent.cpp
 	<cstdlib>
 	<iostream>
 	<cmath>
@@ -57,4 +59,32 @@
 	"world.h"
 	"mysdl.h"
 	"agent.h"
+
+1487783303 source:c:\users\android\desktop\evolution2\neuron.cpp
+	"neuron.h"
+	<algorithm>
+	<fstream>
+
+1487778216 c:\users\android\desktop\evolution2\neuron.h
+	"neural_network_constant.h"
+	"debug.h"
+	"release.h"
+
+1487785037 c:\users\android\desktop\evolution2\neural_network_constant.h
+	<inttypes.h>
+
+1487808072 c:\users\android\desktop\evolution2\neural_network.h
+	<inttypes.h>
+	"neural_network_constant.h"
+	"neuron.h"
+
+1487780434 source:c:\users\android\desktop\evolution2\input_neuron.cpp
+	"input_neuron.h"
+	"neural_network_constant.h"
+
+1487780393 c:\users\android\desktop\evolution2\input_neuron.h
+	"neuron.h"
+
+1487808189 source:c:\users\android\desktop\evolution2\neural_network.cpp
+	"neural_network.h"
 

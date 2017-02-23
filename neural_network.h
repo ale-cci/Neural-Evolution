@@ -1,17 +1,20 @@
 #pragma once
+#include <inttypes.h>
+#include "neural_network_constant.h"
+#include "neuron.h"
 // TODO: Fix the number of neurons
-const static uint8_t INPUT_CELLS     = 18;
-const static uint8_t OUTPUT_CELLS    = 18;
-const static uint8_t NEURONS_PER_LAYER  = 18;
-const static uint8_t NUMBER_OF_LAYERS   = 4;
-typedef double DATATYPE;
-
+// TODO: check the output range of each cell
+// TODO: create the output neuron class, child of neuron, to create a recurrent nn
 class NEURAL_NETWORK {
     private:
-        NEURON input_later[INPUT_CELLS];
+        NEURON input_layer[INPUT_CELLS];
         NEURON hidden_layer[NUMBER_OF_LAYERS][NEURONS_PER_LAYER];
-        NEURON output_layer[OUTPUT_CELLS]
+        NEURON output_layer[OUTPUT_CELLS];
     public:
-        void input(DATATYPE in[INPUT_CELLS]);
-        void output();
+        void input(_PRECISION *in);
+        void execute();
+        void init();
+        void output(struct AGENT* agent);
+        void save(std::ofstream& file);
+        void load(std::ifstream& file);
 };

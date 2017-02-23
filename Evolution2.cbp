@@ -42,7 +42,10 @@
 		<Unit filename="main.cpp" />
 		<Unit filename="mysdl.cpp" />
 		<Unit filename="mysdl.h" />
+		<Unit filename="neural_network.cpp" />
 		<Unit filename="neural_network.h" />
+		<Unit filename="neural_network_constant.h" />
+		<Unit filename="neuron.cpp" />
 		<Unit filename="neuron.h" />
 		<Unit filename="release.cpp">
 			<Option target="Release" />
@@ -50,7 +53,6 @@
 		<Unit filename="release.h">
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="synapsy.h" />
 		<Unit filename="world.cpp" />
 		<Unit filename="world.h" />
 		<Extensions>
