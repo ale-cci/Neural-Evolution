@@ -1,13 +1,12 @@
 #include <iostream>
 #include "generic_functions.h"
+#include "world.h"
+#include "agent.h"
 
 void warning(std::string id, std::string msg) {
-    std::cout << id << "-" << msg << std::endl;
+    // TODO: print on file
+    std::cerr << id << "-" << msg << std::endl;
     return ;
-}
-
-int rand(int LOWER, int UPPER) {
-    return (rand() % (UPPER - LOWER + 1 )) + LOWER;
 }
 
 void printagent(AGENT* _agent) {

@@ -1,18 +1,20 @@
 #pragma once
 #include "generic_functions.h"
 #include "neural_network_constant.h"
+#include "layer.h"
 
 struct NEURON {
     int input_nums = 0;
     _PRECISION input_sum;
     _PRECISION prop_value; // precision value of the neuron
-    _PRECISION synapsy[NEURONS_PER_LAYER];
+    _PRECISION *synapsy;
     void input(_PRECISION in);
-    void init(NEURON* nextlayer);
-    void execute(NEURON* nextlayer);
+    void init(struct LAYER* nextlayer);
+    void execute(struct LAYER* nextlayer);
     void refresh();
-    NEURON();
-    void inherit_from(NEURON* father);
-    void save(std::ofstream& out);
-    void load(std::ifstream& in);
+    void inherit_from(NEURON* father, LAYER* nextlayer);
+    void mutate(struct LAYER* nextlayer);
+    double spread_value();
+    void save(std::ofstream& out, LAYER* nextlayer);
+    void load(std::ifstream& in, LAYER* nextlayer);
 };

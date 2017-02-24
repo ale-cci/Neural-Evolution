@@ -33,3 +33,10 @@ void line_circle_collision(double m_line, double q_line, double x_center, double
 double distance(COORD* A, COORD* B) {
     return sqrt(pow((A->X - B->X), 2) + pow((A->Y - B->Y), 2));
 }
+double mod360(double alpha) {
+    while(alpha < 0)
+        alpha += 360;
+    while(alpha >= 360)
+        alpha -= 360;
+    return alpha;
+}

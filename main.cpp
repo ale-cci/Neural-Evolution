@@ -5,13 +5,14 @@
 #include <cstdlib>
 
 #include "mysdl.h"
-#include "generic_functions.h"
 #include "world.h"
 #include "generic_functions.h"
 
 
 int main (int argc, char* args[]) {
-    srand(time(NULL));
+    time_t seed = time(NULL);
+    srand(1487971779);
+    std::cout << "SEED" << " " << seed << std::endl;
     bool show_background = false;
     SDL_Event event;
 
@@ -32,12 +33,6 @@ int main (int argc, char* args[]) {
             else
             if (event.type == SDL_KEYDOWN)
                 switch (event.key.keysym.sym) {
-                        // do something
-                    case SDLK_i:
-                        agent[0].f_left  = (!agent[0].f_left) * 5;
-                        break;
-                    case SDLK_p:
-                        agent[0].f_right = (!agent[0].f_right) * 5;
                         break;
                     case SDLK_r:    // randomize food
                         init_food();
@@ -46,7 +41,7 @@ int main (int argc, char* args[]) {
                         show_background = !show_background;
                         break;
                     case SDLK_e:
-                        eat(&agent[0]);
+                        crunch(0);
                         break;
                     case SDLK_SPACE:
                         agent[0].boost_strenght = 30;
@@ -58,19 +53,15 @@ int main (int argc, char* args[]) {
         SDL_RenderClear(renderer);
         if (show_background)
             printworld();
-
+        input_agents();
+        execute_agents();
+        output_agents();
+        update_world();
         move_agents();
-        //std::cout << agent[0].X << " " << agent[0].Y << std::endl;
-        //moveagent(&agent[0]);
         print_agents();
-        give_agent_input(&agent[0]);
-        //printagent(&agent[1]);
-        //printagent(&agent[0]);
         SDL_RenderPresent(renderer);
         SDL_Delay(PAUSE_DELAY);
     }
-
-    //SDL_DestroyImage(image);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(gWindow);
     gWindow = NULL;
