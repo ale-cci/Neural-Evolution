@@ -29,6 +29,7 @@ void NEURAL_NETWORK::output(const uint8_t id) {
 
     agent[id].f_left = MAX_STRENGHT * last_output[1];
     agent[id].f_right = MAX_STRENGHT * last_output[2];
+    agent[id].boost_strenght = 1 + last_output[3];
     /*
     agent[id].col.R = 255*last_output[3];
     agent[id].col.G = 255*last_output[4];

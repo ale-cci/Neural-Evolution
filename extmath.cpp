@@ -40,3 +40,11 @@ double mod360(double alpha) {
         alpha -= 360;
     return alpha;
 }
+
+double modX(double alpha, double X) {
+    while (alpha < 0)
+        alpha += X;
+    while (alpha >= X)
+        alpha -= X;
+    return alpha;
+}

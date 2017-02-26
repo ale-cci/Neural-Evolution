@@ -55,10 +55,6 @@
 		<Unit filename="release.cpp">
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="resource.h" />
-		<Unit filename="resource.rc">
-			<Option compilerVar="WINDRES" />
-		</Unit>
 		<Unit filename="world.cpp" />
 		<Unit filename="world.h" />
 		<Extensions>

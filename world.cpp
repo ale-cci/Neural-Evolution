@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <ctime>
+#include <iostream>
 #include <algorithm>
 #include "generic_functions.h"
 #include "world.h"
@@ -41,7 +42,7 @@ void init_food() {
 
 void init_agents() {
     for (int i = 0; i < START_POPULATION; ++i) {
-        agent[i] = *makeagent();
+        agent[i] = makeagent();
         agent[i].brain.init();
     }
 }
@@ -58,7 +59,7 @@ void move_agents() {
 
 void input_agents() {
     for (int i=0; i < POPULATION_COUNT; ++i)
-        give_agent_input(&agent[i]);
+        give_agent_input(i);
 }
 
 void execute_agents() {
@@ -81,9 +82,6 @@ void addfood() {
 void update_world() {
     // update the age
     static time_t actualtime = time(NULL);
-    for (int i=0; i < POPULATION_COUNT; ++i) {
-
-    }
     while(POPULATION_COUNT < MIN_POPULATION) {
         insert_random_agent();
     }
@@ -93,7 +91,7 @@ void update_world() {
         if ((agent[i].food_bar >= FOOD_FOR_REPRODUCTION) && (POPULATION_COUNT < MAX_POPULATION )){
             agent[i].food_bar = 0;
             if(POPULATION_COUNT < MAX_POPULATION -1) {
-                agent[POPULATION_COUNT] = *makeagent();
+                agent[POPULATION_COUNT] = makeagent();
                 agent[POPULATION_COUNT].food_category = agent[i].food_category + rand(-1.0, +1.0);
                 agent[POPULATION_COUNT].brain.init();
                 agent[POPULATION_COUNT].brain.inherit(&agent[i].brain);
@@ -110,7 +108,7 @@ void update_world() {
 }
 void insert_random_agent() {
     if (POPULATION_COUNT < MAX_POPULATION) {
-        agent[POPULATION_COUNT] = *makeagent();
+        agent[POPULATION_COUNT] = makeagent();
         agent[POPULATION_COUNT].brain.init();
         POPULATION_COUNT++;
     }
@@ -120,24 +118,18 @@ int t_change_agent_status(void* ) {
     uint32_t delay = 1 * 1000;
     while(1) {
         for (int i=0; i < POPULATION_COUNT; ++i){
-            agent[i].energy--;
-            if (agent[i].energy < MAX_HEALTH)
-                if (agent[i].food_bar) {
-                    double needed   = std::min(MAX_HEALTH - agent[i].energy, 1.0);
-                    double haved    = std::min(needed, agent[i].food_bar);
-                    agent[i].food_bar -= haved;
-                    agent[i].energy   += haved;
-                }
+            agent[i].energy = agent[i].energy - (1 + agent[i].boost_strenght);
+
             if (agent[i].digesting)
                 agent[i].digesting--;
-                if (agent[i].energy <= 0) {
-            if (MEAT_COUNT < MAX_MEAT) {
-                meat[MEAT_COUNT] = getcenter(&agent[i]);
-                MEAT_COUNT++;
+            if (agent[i].energy <= 0) {
+                if (MEAT_COUNT < MAX_MEAT) {
+                    meat[MEAT_COUNT] = getcenter(&agent[i]);
+                    MEAT_COUNT++;
+                }
+                agent[i] = agent[POPULATION_COUNT-1];
+                POPULATION_COUNT--;
             }
-            agent[i] = agent[POPULATION_COUNT-1];
-            POPULATION_COUNT--;
-        }
         }
         SDL_Delay(delay);
     }

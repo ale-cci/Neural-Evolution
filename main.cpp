@@ -12,8 +12,8 @@
 
 int main (int argc, char* args[]) {
     time_t seed = time(NULL);
-
     srand(seed);
+
     std::cout << "SEED" << " " << seed << std::endl;
     bool show_background = false;
     SDL_Event event;
@@ -22,7 +22,7 @@ int main (int argc, char* args[]) {
         warning ("MAIN THREAD", "error on initializing, terminating process");
         return 0;
     }
-    SDL_SetWindowIcon(gWindow, IMG_Load("./evo.png"));
+    SDL_SetWindowIcon(gWindow, IMG_Load("./IMAGES/evo.png"));
     init_agents();
     init_food();
     SDL_Thread* food_t = SDL_CreateThread(t_init_food, "food_t", (void *)NULL);
@@ -63,9 +63,15 @@ int main (int argc, char* args[]) {
                 switch (event.key.keysym.sym) {
                     case SDLK_h:    // show background
                         show_background = !show_background;
-
+                        break;
+                    case SDLK_i:
+                        agent[0].f_left = (!agent[0].f_left)*MAX_STRENGHT;
+                        break;
+                    case SDLK_p:
+                        agent[0].f_right = (!agent[0].f_right)*MAX_STRENGHT;
                         break;
                     case SDLK_s:
+                        agent[0].rotation ++;
                         break;
 
                     case SDLK_SPACE:
@@ -79,6 +85,7 @@ int main (int argc, char* args[]) {
         if (show_background)
             printworld();
         input_agents();
+        //give_agent_input(0);
         execute_agents();
         output_agents();
         update_world();

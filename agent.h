@@ -22,7 +22,7 @@ struct AGENT {
     uint8_t food_category;
     STRENGHT_PRECISION f_left;
     STRENGHT_PRECISION f_right;
-    int32_t boost_strenght = 1;
+    double boost_strenght;
     NEURAL_NETWORK brain;
     uint16_t digesting;
     SDL_Color col;
@@ -33,10 +33,10 @@ void printagent(AGENT* agent);
 bool randomize_agent_positions();
 //bool randomize_agent_neural_network();
 
-AGENT* makeagent();
+AGENT makeagent();
 
 void moveagent(AGENT* _agent);
-void give_agent_input(AGENT * _agent);
+void give_agent_input(const uint16_t id);
 void execute_agent_input(const uint16_t id);
 void execute_agent_output(const uint16_t id);
 // erbivore function
@@ -46,4 +46,7 @@ void bite(const uint16_t id, const double strenght);
 int32_t getcellX(AGENT * _agent);
 int32_t getcellY(AGENT * _agent);
 int32_t smell(AGENT* _agent);
+SDL_Color look(const uint16_t id,const double direction, const double alpha);
+SDL_Color segment_look(const uint16_t id, const double direction);
+
 COORD getcenter(AGENT* _agent);
