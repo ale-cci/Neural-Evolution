@@ -1,9 +1,11 @@
 # depslib dependency file v1.0
-1487973402 source:c:\users\android\desktop\evolution2\main.cpp
+1488069372 source:c:\users\android\desktop\evolution2\main.cpp
 	<SDL.h>
+	<SDL_image.h>
 	<time.h>
 	<conio.h>
 	<iostream>
+	<fstream>
 	<cstdlib>
 	"mysdl.h"
 	"world.h"
@@ -20,7 +22,7 @@
 1487878032 c:\users\android\desktop\evolution2\release.h
 	<string>
 
-1487878187 source:c:\users\android\desktop\evolution2\mysdl.cpp
+1488067579 source:c:\users\android\desktop\evolution2\mysdl.cpp
 	<SDL.h>
 	<cstdlib>
 	<string>
@@ -31,26 +33,27 @@
 	<SDL.h>
 	<string>
 
-1487977761 source:c:\users\android\desktop\evolution2\world.cpp
+1488054315 source:c:\users\android\desktop\evolution2\world.cpp
 	<cstdlib>
 	<ctime>
+	<algorithm>
 	"generic_functions.h"
 	"world.h"
 	"mysdl.h"
 	"agent.h"
 
-1487977580 c:\users\android\desktop\evolution2\world.h
+1488056337 c:\users\android\desktop\evolution2\world.h
 	<vector>
 	"mysdl.h"
 	"agent.h"
 
-1487969839 c:\users\android\desktop\evolution2\agent.h
+1488056323 c:\users\android\desktop\evolution2\agent.h
 	<inttypes.h>
 	"mysdl.h"
 	"extmath.h"
 	"neural_network.h"
 
-1487977314 source:c:\users\android\desktop\evolution2\agent.cpp
+1488056900 source:c:\users\android\desktop\evolution2\agent.cpp
 	<cstdlib>
 	<iostream>
 	<cmath>
@@ -60,22 +63,22 @@
 	"extmath.h"
 	"agent.h"
 
-1487978087 source:c:\users\android\desktop\evolution2\neuron.cpp
+1488067200 source:c:\users\android\desktop\evolution2\neuron.cpp
 	<algorithm>
 	<fstream>
 	<iostream>
 	"neuron.h"
 	"generic_functions.h"
 
-1487972298 c:\users\android\desktop\evolution2\neuron.h
+1488067175 c:\users\android\desktop\evolution2\neuron.h
 	"generic_functions.h"
 	"neural_network_constant.h"
 	"layer.h"
 
-1487961145 c:\users\android\desktop\evolution2\neural_network_constant.h
+1488064382 c:\users\android\desktop\evolution2\neural_network_constant.h
 	<inttypes.h>
 
-1487960616 c:\users\android\desktop\evolution2\neural_network.h
+1488067155 c:\users\android\desktop\evolution2\neural_network.h
 	<inttypes.h>
 	"neural_network_constant.h"
 	"neuron.h"
@@ -87,7 +90,7 @@
 1487780393 c:\users\android\desktop\evolution2\input_neuron.h
 	"neuron.h"
 
-1487972492 source:c:\users\android\desktop\evolution2\neural_network.cpp
+1488067169 source:c:\users\android\desktop\evolution2\neural_network.cpp
 	"neural_network.h"
 	<iostream>
 	<cmath>
@@ -100,18 +103,18 @@
 1487955259 c:\users\android\desktop\evolution2\extmath.h
 	<inttypes.h>
 
-1487961169 c:\users\android\desktop\evolution2\generic_functions.h
+1488036439 c:\users\android\desktop\evolution2\generic_functions.h
 	<string>
 
-1487961174 source:c:\users\android\desktop\evolution2\generic_functions.cpp
+1488063826 source:c:\users\android\desktop\evolution2\generic_functions.cpp
 	"generic_functions.h"
 	<cstdlib>
 	<cmath>
 
-1487972357 c:\users\android\desktop\evolution2\layer.h
+1488067184 c:\users\android\desktop\evolution2\layer.h
 	"neuron.h"
 
-1487972342 source:c:\users\android\desktop\evolution2\layer.cpp
+1488067210 source:c:\users\android\desktop\evolution2\layer.cpp
 	<fstream>
 	<iostream>
 	"layer.h"
@@ -125,4 +128,9 @@
 	<cmath>
 	"agent.h"
 	"world.h"
+
+1488069015 source:c:\users\android\desktop\evolution2\resource.rc
+	"resource.h"
+
+1488069038 c:\users\android\desktop\evolution2\resource.h
 

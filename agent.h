@@ -19,11 +19,13 @@ struct AGENT {
     double rotation;
     double speed;
     double food_bar;
-    float food_category;
+    uint8_t food_category;
     STRENGHT_PRECISION f_left;
     STRENGHT_PRECISION f_right;
     int32_t boost_strenght = 1;
     NEURAL_NETWORK brain;
+    uint16_t digesting;
+    SDL_Color col;
 };
 
 void printagent(AGENT* agent);
@@ -38,8 +40,8 @@ void give_agent_input(AGENT * _agent);
 void execute_agent_input(const uint16_t id);
 void execute_agent_output(const uint16_t id);
 // erbivore function
-void crunch(const uint16_t id);
-void bite(const uint16_t id);
+void crunch(const uint16_t id, const double strenght);
+void bite(const uint16_t id, const double strenght);
 
 int32_t getcellX(AGENT * _agent);
 int32_t getcellY(AGENT * _agent);

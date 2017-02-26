@@ -1,9 +1,10 @@
 #include <SDL.h>
+#include <SDL_image.h>
 #include <time.h>
 #include <conio.h>
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
-
 #include "mysdl.h"
 #include "world.h"
 #include "generic_functions.h"
@@ -11,7 +12,8 @@
 
 int main (int argc, char* args[]) {
     time_t seed = time(NULL);
-    srand(1487971779);
+
+    srand(seed);
     std::cout << "SEED" << " " << seed << std::endl;
     bool show_background = false;
     SDL_Event event;
@@ -20,33 +22,56 @@ int main (int argc, char* args[]) {
         warning ("MAIN THREAD", "error on initializing, terminating process");
         return 0;
     }
-
-    init_food();
+    SDL_SetWindowIcon(gWindow, IMG_Load("./evo.png"));
     init_agents();
-    agent[0].X = SCREEN_WIDTH/2;
-    agent[0].Y = SCREEN_HEIGHT/2;
+    init_food();
+    SDL_Thread* food_t = SDL_CreateThread(t_init_food, "food_t", (void *)NULL);
+    SDL_Thread* death_t = SDL_CreateThread(t_change_agent_status, "death_t", (void *)NULL);
 
     for (bool quit = false; quit == false; ) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT)
                 quit = true;
             else
-            if (event.type == SDL_KEYDOWN)
+            if (event.type == SDL_DROPFILE) {
+                SDL_ShowSimpleMessageBox(
+                        SDL_MESSAGEBOX_INFORMATION,
+                        "File dropped on window",
+                        event.drop.file,
+                        gWindow
+                    );
+            }
+            else
+            if (event.type == SDL_KEYDOWN) {
+                const Uint8 *keystate = SDL_GetKeyboardState(NULL);
+                bool shiftpressed = keystate[SDL_SCANCODE_LSHIFT] || keystate[SDL_SCANCODE_RSHIFT];
+                if ((event.key.keysym.sym >= SDLK_0) && (event.key.keysym.sym <= SDLK_9)) {
+                    char filename[20];
+                    sprintf(filename,"save%c.sav", event.key.keysym.sym);
+                    std::cout << filename << std::endl;
+                    if (shiftpressed) {
+                            std::ofstream out(filename, std::ios::binary);
+                            out.write((char*)agent, sizeof(agent));
+                            out.close();
+                    }
+                    else {
+                            std::ifstream out(filename, std::ios::binary);
+                            out.read((char*)agent, sizeof(agent));
+                            out.close();
+                    }
+                }
                 switch (event.key.keysym.sym) {
-                        break;
-                    case SDLK_r:    // randomize food
-                        init_food();
-                        break;
                     case SDLK_h:    // show background
                         show_background = !show_background;
+
                         break;
-                    case SDLK_e:
-                        crunch(0);
+                    case SDLK_s:
                         break;
+
                     case SDLK_SPACE:
-                        agent[0].boost_strenght = 30;
                         break;
                 }
+            }
         }
         // rederer background color
         SDL_SetRenderDrawColor(renderer, 38, 38, 38, 255);

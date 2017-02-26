@@ -12,7 +12,7 @@ double rand(double LOWER, double UPPER) {
 }
 
 
-double special_one(double prop_value, double input) {
-    double X = input - prop_value;
-    return 1 / (1 + exp(A * X));
+double special_one(double input) {
+    double ret = 1/(1+exp(A*input));
+    return ret;
 }

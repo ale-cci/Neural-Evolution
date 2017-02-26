@@ -14,7 +14,8 @@ void NEURON::execute(LAYER* next_layer) {
     return ;
 }
 double NEURON::spread_value() {
-    return special_one(prop_value, input_sum /  std::max(1, input_nums));
+    uint32_t in = std::max (input_nums, 1);
+    return special_one(prop_value + input_sum / in);
 }
 void NEURON::input(_PRECISION in) {
     input_sum += in;
@@ -27,7 +28,7 @@ void NEURON::refresh() {
 }
 void NEURON::init(LAYER* nextlayer) {
     input_nums = 0;
-    prop_value = rand(0.0, 1.0);
+    prop_value = rand(-1.0, 1.0);
     if (nextlayer == nullptr)
         return ;
     synapsy = new _PRECISION[nextlayer->neuron_number];
@@ -46,19 +47,6 @@ void NEURON::inherit_from(NEURON* father, LAYER* nextlayer) {
         return ;
     for (int i=0; i < nextlayer->neuron_number; ++i)
         synapsy[i] = father->synapsy[i];
-}
-
-void NEURON::save(std::ofstream& out, LAYER* nextlayer) {
-    out << prop_value << std::endl;
-    for (int i = 0; i < nextlayer->neuron_number; ++i)
-        out << synapsy[i] << " ";
-    out << std::endl;
-}
-
-void NEURON::load(std::ifstream& in, LAYER* nextlayer) {
-    in >> prop_value;
-    for (int i = 0; i < nextlayer->neuron_number; ++i)
-        in >> synapsy[i];
 }
 
 void NEURON::mutate(LAYER* nextlayer) {

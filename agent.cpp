@@ -13,11 +13,12 @@ AGENT* makeagent() {
     AGENT agent;
     agent_texture = *load_trsp("IMAGES/debug01.bmp");
     agent.energy = MAX_HEALTH;
-    agent.food_category = rand(0, 100);
+    agent.food_category = rand(0, 1);
     agent.food_bar = 0;
     agent.rotation = rand(0,360);
     agent.f_left = 0;
     agent.f_right = 0;
+    agent.digesting = 0;
     agent.X = rand(agent_texture.width, SCREEN_WIDTH - agent_texture.width);
     agent.Y = rand(agent_texture.height, SCREEN_HEIGHT - agent_texture.height);
     return &agent;
@@ -29,9 +30,7 @@ void moveagent(AGENT* agnt) {
     double acceleration = 2*std::min(agnt->f_left, agnt->f_right) / AGENT_MASS;
     double moveX = std::min(acceleration, MAX_SPEED)* sin(agnt->rotation * PI / 180);
     double moveY = std::min(acceleration, MAX_SPEED)* cos(agnt->rotation * PI/180);
-    if (acceleration > 0 ) {
-        //acceleration -= FRICTION_CONSTANT * GRAVITY_CONSTANT;
-    }
+
     agnt->X = agnt->X + moveX;
     agnt->Y = agnt->Y - moveY;
     agnt->rotation = agnt->rotation + ((agnt->f_right - agnt->f_left) / (agent_texture.width * AGENT_MASS)) * 180/PI;
@@ -57,21 +56,26 @@ int32_t getcellY(AGENT * _agent) {
     return getcenter(_agent).Y / SQUARE_SIZE;
 }
 
-void crunch(const uint16_t id) {
-    agent[id].energy--;
-
+void crunch(const uint16_t id, const double strenght) {
+    if (agent[id].digesting) {
+        agent[id].energy -= CRUNCH_ENERGY * strenght;
+        return ;
+    }
     int32_t cellX = getcellX(&agent[id]);
     int32_t cellY = getcellY(&agent[id]);
     if (area[cellY][cellX] > 0) {
-        agent[id].energy += MEAT_ENERGY * (1 -agent[id].food_category/ 255.0);
-        agent[id].food_category = std::max(0.0, agent[id].food_category - CHANGING_FOOD_RATE);
-        area[cellY][cellX] --;
-        agent[id].food_bar += MEAT_ENERGY * (1 -agent[id].food_category/ 255.0);
+        area[cellY][cellX] -= strenght;
+        if (area[cellY][cellX] < 0)
+            area[cellY][cellX] = 0;
+        agent[id].digesting = VEGETABLE_DIGEST_TIME * strenght;
+        agent[id].food_bar += VEGETABLE_ENERGY * strenght;
     }
 }
-void bite(uint16_t ID) {
+void bite(const uint16_t ID, const double strenght) {
     //warning("BITE", "Biting...");
-    agent[ID].energy -= BITE_ENERGY;
+    agent[ID].energy -= BITE_ENERGY * strenght;
+    if (agent[ID].digesting)
+        return ;
     uint8_t number_of_collisions = 0;
     double direction = (agent[ID].rotation + 270) * PI / 180;
     COORD collisions[2];
@@ -95,11 +99,10 @@ void bite(uint16_t ID) {
             if (behind)
                 continue;
             warning("BITE", "YUMMY!");
-            agent[ID].energy = std::min(agent[ID].energy + MEAT_ENERGY * (agent[ID].food_category) / 255.0, (double)MAX_HEALTH);
-            agent[i].energy -= BITE_DAMAGE;
-            agent[ID].food_bar += (MEAT_ENERGY*(agent[ID].food_category) / 255.0);
-            agent[ID].food_category = std::min(255.0, agent[ID].food_category + CHANGING_FOOD_RATE);
-            break;
+            agent[i].energy -= BITE_DAMAGE * strenght;
+            agent[ID].digesting = MEAT_DIGEST_TIME * strenght;
+            agent[ID].food_bar += (MEAT_ENERGY * strenght);
+            return ;
         }
     }
 }
@@ -169,17 +172,20 @@ void give_agent_input(AGENT * _agent) {
 
     double health = _agent->energy;
     double foodeyeleft, foodeyeright;
-
+    double digesting_complete = 1 - (double)_agent->digesting / std::max(MEAT_DIGEST_TIME, VEGETABLE_DIGEST_TIME);
     SDL_Color eye_1  = look(_agent, (50 + _agent->rotation + 180)* PI / 180);
-    SDL_Color eye_2  = look(_agent, (90 + _agent->rotation + 180)* PI / 180);
-    SDL_Color eye_3  = look(_agent, (130 + _agent->rotation + 180)* PI / 180);
+    SDL_Color eye_2  = look(_agent, (72 + _agent->rotation + 180)* PI / 180);
+    SDL_Color eye_3  = look(_agent, (108 + _agent->rotation + 180)* PI / 180);
+    SDL_Color eye_4  = look(_agent, (130 + _agent->rotation + 180)* PI / 180);
    // bool collision = in_agent({x + _agent->X + agent_texture.width / 2, y + _agent->Y + agent_texture.height / 2}, _agent);
 
     _PRECISION inputs[INPUT_CELLS] = {
             food / MAX_FOOD_IN_AREA, health / MAX_HEALTH, neightbours / MAX_POPULATION,
-            eye_1.r / 255.0, eye_1.g / 255.0, eye_1.b / 255.0, eye_1.a / AGENT_SEEN_RADIUS,
-            eye_2.r / 255.0, eye_2.g / 255.0, eye_2.b / 255.0, eye_2.a / AGENT_SEEN_RADIUS,
-            eye_3.r / 255.0, eye_3.g / 255.0, eye_3.b / 255.0, eye_3.a / AGENT_SEEN_RADIUS,
+            eye_1.r / 255.0, eye_1.g / 255.0, eye_1.b / 255.0, 1 - eye_1.a / AGENT_SEEN_RADIUS,
+            eye_2.r / 255.0, eye_2.g / 255.0, eye_2.b / 255.0, 1 - eye_2.a / AGENT_SEEN_RADIUS,
+            eye_3.r / 255.0, eye_3.g / 255.0, eye_3.b / 255.0, 1 - eye_3.a / AGENT_SEEN_RADIUS,
+            eye_4.r / 255.0, eye_4.g / 255.0, eye_4.b / 255.0, 1 - eye_4.a / AGENT_SEEN_RADIUS,
+            digesting_complete,
             };
     _agent->brain.input(inputs);
 }
