@@ -51,7 +51,7 @@ void NEURON::inherit_from(NEURON* father, LAYER* nextlayer) {
 
 void NEURON::mutate(LAYER* nextlayer) {
     if (rand(0, 100) < MUTATION_PERCENTAGE)
-        prop_value += rand(-MUTATION_CHANGE,+MUTATION_CHANGE);
+        prop_value += rand(-MUTATION_CHANGE,+ MUTATION_CHANGE);
     if (nextlayer == nullptr)
         return ;
     for (int i = 0; i < nextlayer->neuron_number; ++i)

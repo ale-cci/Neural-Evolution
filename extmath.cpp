@@ -34,17 +34,24 @@ double distance(COORD* A, COORD* B) {
     return sqrt(pow((A->X - B->X), 2) + pow((A->Y - B->Y), 2));
 }
 double mod360(double alpha) {
-    while(alpha < 0)
-        alpha += 360;
-    while(alpha >= 360)
-        alpha -= 360;
-    return alpha;
+    return modX(alpha, 360.);
 }
 
+double mod2PI(double alpha) {
+    return modX(alpha, 2 * PI);
+}
 double modX(double alpha, double X) {
-    while (alpha < 0)
-        alpha += X;
-    while (alpha >= X)
-        alpha -= X;
-    return alpha;
+    int64_t delta = alpha / X;
+    return alpha + (-delta + (alpha < 0)) * X;
+}
+
+double getangle(double SIN, double COS) {
+    return modX(acos(COS) * ((SIN > 0) ? 1 : -1) , 2 * PI);
+}
+
+double sex_rad(const double alpha) {
+    return alpha * PI / 180;
+}
+double rad_sex(const double alpha) {
+    return alpha * 180 / PI;
 }

@@ -2,6 +2,11 @@
 
 #include <SDL.h>
 #include <string>
+#define SDL_YELLOW  {0xff, 0xff, 0, 0}
+#define SDL_RED     {0xff, 0, 0, 0}
+#define SDL_BLUE    {0, 0, 0xff, 0}
+#define SDL_GREEN   {0, 0xff, 0, 0}
+#define SDL_WHITE   {0xff, 0xff, 0xff, 0}
 
 const static int SCREEN_WIDTH = 1024;   // 32 * 32
 const static int SCREEN_HEIGHT = 640;   // 32 * 20

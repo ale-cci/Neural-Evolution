@@ -9,14 +9,14 @@ const static int MAX_FOOD_IN_AREA =3;
 const static int PAUSE_DELAY    = 30;
 const static int MAX_POPULATION = 24;
 const static int MAX_HEALTH     = 32;
-const static int START_POPULATION = 8;
-const static int MIN_POPULATION = 16;
+const static int START_POPULATION = 2;
+const static int MIN_POPULATION = 12;
 const static int AREA_WIDTH     = SCREEN_WIDTH / SQUARE_SIZE;
 const static int AREA_HEIGHT    = SCREEN_HEIGHT / SQUARE_SIZE;
 const static STRENGHT_PRECISION PROPULSOR_FORCE = 1;
 const static double FRICTION_CONSTANT = 1;
 const static double GRAVITY_CONSTANT = 9.81;
-const static double AGENT_SEEN_RADIUS = 96; /// 80
+const static double AGENT_SEEN_RADIUS = 200; /// 96
 const static double AGENT_BITE_RADIUS = 32;
 const static double VEGETABLE_ENERGY = 5;
 const static int MEAT_ENERGY = 10;
@@ -30,7 +30,8 @@ const static double MAX_STRENGHT = 4;
 const static double FOOD_FOR_REPRODUCTION = 40;
 const static int MAX_MEAT = MAX_POPULATION;
 const static float MAX_FOOD_CATEGORY = 2;
-
+const static uint16_t AGENT_BLOOD_RADIUS = 40;
+const static uint8_t FOOD_SENSORS = 3;
 extern double area[AREA_HEIGHT][AREA_WIDTH];
 extern AGENT  agent[MAX_POPULATION];
 extern int POPULATION_COUNT;

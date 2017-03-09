@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 
-#define PI 3.14159265
 
 const static double A = -6;
 

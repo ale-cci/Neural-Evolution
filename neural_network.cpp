@@ -7,8 +7,6 @@ void NEURAL_NETWORK::input(_PRECISION *in) {
     refresh();
     for (int i = 0; i < INPUT_CELLS; ++i)
         input_layer.neuron[i].input(in[i]);
-    for (int i = 0; i < OUTPUT_CELLS; ++i)
-        input_layer.neuron[i+ INPUT_CELLS].input(in[i + INPUT_CELLS]);
 }
 
 void NEURAL_NETWORK::output(const uint8_t id) {
@@ -16,15 +14,12 @@ void NEURAL_NETWORK::output(const uint8_t id) {
     for (int i = 0; i< OUTPUT_CELLS; ++i)
         last_output[i] = output_layer.neuron[i].spread_value();
 
-    switch (agent[id].food_category) {
-        case 0:
+    if (agent[id].food_category == AGENT_HERBIVORE) {
             crunch(id, last_output[0]); // eat
-            break;
-        case 1:
+    }
+    else
+    if (agent[id].food_category == AGENT_CARNIVORE) {
             bite(id, last_output[0]);
-            break;
-        case 2:
-            break;
     }
 
     agent[id].f_left = MAX_STRENGHT * last_output[1];
@@ -47,7 +42,7 @@ void NEURAL_NETWORK::init() {
         last_output[i] = 0;
     for (int l = NUMBER_OF_LAYERS -2; l >= 0; --l)
         hidden_layer[l].init(&hidden_layer[l+1], NEURONS_PER_LAYER);
-    input_layer.init(&hidden_layer[0], INPUT_CELLS + OUTPUT_CELLS);
+    input_layer.init(&hidden_layer[0], INPUT_CELLS);
 }
 void NEURAL_NETWORK::refresh() {
     input_layer.refresh();

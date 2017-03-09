@@ -54,7 +54,7 @@ void print_agents() {
 
 void move_agents() {
     for (int i=0; i < POPULATION_COUNT; ++i)
-        moveagent(&agent[i]);
+        moveagent(i);
 }
 
 void input_agents() {
