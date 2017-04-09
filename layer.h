@@ -1,14 +1,19 @@
 #pragma once
 #include "neuron.h"
 
+uint8_t  nneurons(const uint8_t layer_id);
+uint8_t anneurons(const uint8_t layer_id);
+uint8_t add_neuron(const uint8_t layer_id);
+
 struct LAYER {
-    int8_t neuron_number;
+    uint8_t layer_id;
     struct NEURON* neuron;
 
-    void init(LAYER * nextlayer, int8_t number_of_neurons);
-    void execute(LAYER* nextlayer);
-    void refresh();
-    void inherit_from(LAYER* father, LAYER* nextlayer);
+    void init(const uint8_t layer_id);
+    void execute(NEURON* nextlayer);
+    void duplicate(LAYER* father);
+    void destroy();
 
-    void mutate(LAYER* nextlayer);
+    void mutate();
+    LAYER& operator=(const LAYER& ) noexcept;
 };

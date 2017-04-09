@@ -2,19 +2,24 @@
 #include <fstream>
 #include <iostream>
 #include "neuron.h"
+#include "extmath.h"
 #include "generic_functions.h"
 
-void NEURON::execute(LAYER* next_layer) {
-    for (int i=0; i < next_layer->neuron_number; ++i) {
-        if (synapsy[i] <= 0) // not connected
-            continue;
-        // broadcast his value
-        next_layer->neuron[i].input( spread_value() * synapsy[i]);
+
+void NEURON::execute(struct NEURON* next_layer) {
+    for (int i=0; i < nneurons(layer_id + 1); ++i) {
+        next_layer[i].input_sum += (spread_value()*synapsis[i]);
     }
     return ;
 }
+
+void NEURON::refresh() {
+    input_sum = 0;
+}
+
 double NEURON::spread_value() {
-    uint32_t in = std::max (input_nums, 1);
+    uint8_t in = 0;
+    in = (anneurons(layer_id) > 1) ? anneurons(layer_id) : 1;
     return special_one(prop_value + input_sum / in);
 }
 void NEURON::input(_PRECISION in) {
@@ -22,55 +27,49 @@ void NEURON::input(_PRECISION in) {
     return ;
 }
 
-void NEURON::refresh() {
-    input_sum = 0;
-    return ;
-}
-void NEURON::init(LAYER* nextlayer) {
-    input_nums = 0;
-    prop_value = rand(-1.0, 1.0);
-    if (nextlayer == nullptr)
-        return ;
-    synapsy = new _PRECISION[nextlayer->neuron_number];
-    for (int i = 0; i < nextlayer->neuron_number; ++i) {
-        synapsy[i] = std::max(0.0, rand(-0.5, 1.5)); // 1/3 no synapsy
-        //std::cout << synapsy[i] << std::endl;
-        if (synapsy[i])
-            nextlayer->neuron[i].input_nums++;
-    }
-}
-void NEURON::inherit_from(NEURON* father, LAYER* nextlayer) {
+void NEURON::allocate(const uint8_t _layer_id) {
+    layer_id = _layer_id;
 
-    input_nums = father->input_nums;
+    if (nneurons(layer_id+1) > 0)
+        synapsis = new _PRECISION[nneurons(layer_id + 1)];
+
+}
+
+void NEURON::init(const uint8_t layer_id) {
+    allocate(layer_id);
+    prop_value = rand(-1., 1.);
+    for (int i = 0; i < nneurons(layer_id+1); ++i)
+        synapsis[i] = rand(-0.5, +0.5);
+}
+
+void NEURON::destroy() {
+    if (anneurons(layer_id+1) > 0)
+        delete[] synapsis;
+}
+
+void NEURON::duplicate(NEURON* father) {
+    allocate(father->layer_id);
     prop_value = father->prop_value;
-    if (nextlayer == nullptr)
-        return ;
-    for (int i=0; i < nextlayer->neuron_number; ++i)
-        synapsy[i] = father->synapsy[i];
+    for (int i=0; i < nneurons(layer_id+1); ++i)
+        synapsis[i] = father->synapsis[i];
 }
-
-void NEURON::mutate(LAYER* nextlayer) {
+/// FIXME: legge di Hebb
+void NEURON::mutate() {
     if (rand(0, 100) < MUTATION_PERCENTAGE)
-        prop_value += rand(-MUTATION_CHANGE,+ MUTATION_CHANGE);
-    if (nextlayer == nullptr)
-        return ;
-    for (int i = 0; i < nextlayer->neuron_number; ++i)
+        prop_value += rand(-MUTATION_CHANGE, +MUTATION_CHANGE);
+    prop_value = bound(prop_value, -1, +1);
+    for (int i = 0; i < nneurons(layer_id+1); ++i)
         if (rand(0, 100) < MUTATION_PERCENTAGE) {
             double mutation = rand(-MUTATION_CHANGE,+MUTATION_CHANGE);
-            if ((synapsy[i] > 0) && (synapsy[i] + mutation <= 0)) {
-                nextlayer->neuron[i].input_nums--;
-                synapsy[i] = 0;
-            }
-            else
-            if ((synapsy[i] == 0) && (synapsy[i] + mutation > 0)) { // TODO check better this condition
-                nextlayer->neuron[i].input_nums++;
-                synapsy[i] += mutation;
-            }
-            else {
-                synapsy[i] += mutation;
-                if (synapsy[i] > 1)
-                    synapsy[i] = 1;
-            }
+            synapsis[i] += bound(synapsis[i] + mutation, 0, 1);
         }
+}
 
+NEURON& NEURON::operator=(const NEURON& target) noexcept{
+    this->layer_id = target.layer_id;
+    this->prop_value = target.prop_value;
+    this->input_sum = target.input_sum;
+    for (int i=0; i < nneurons(layer_id+1); ++i)
+        this->synapsis[i] = target.synapsis[i];
+    return *this;
 }

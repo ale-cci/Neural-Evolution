@@ -40,6 +40,7 @@
 		</Unit>
 		<Unit filename="extmath.cpp" />
 		<Unit filename="extmath.h" />
+		<Unit filename="generic_agent.cpp" />
 		<Unit filename="generic_functions.cpp" />
 		<Unit filename="generic_functions.h" />
 		<Unit filename="layer.cpp" />

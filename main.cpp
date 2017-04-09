@@ -6,6 +6,7 @@
 #include <conio.h>
 #include <iostream>
 #include <fstream>
+#include <cassert>
 #include <cstdlib>
 #include "mysdl.h"
 #include "world.h"
@@ -14,21 +15,25 @@
 
 int main (int argc, char* args[]) {
     time_t seed = time(NULL);
-    srand(seed);
-
+    srand(1490824058);
     std::cout << "SEED" << " " << seed << std::endl;
+
     bool show_background = false;
     SDL_Event event;
 
     if (init("EVOLUTION SIMULATOR")) {
         warning ("MAIN THREAD", "error on initializing, terminating process");
-        return 0;
+        return EXIT_FAILURE;
     }
+    agent_texture = *load_trsp(texture_path.c_str());
+    #ifdef DEBUG
+    agent_texture.width = 2*AGENT_RADIUS;
+    agent_texture.height = 2*AGENT_RADIUS;
+    #endif
     SDL_SetWindowIcon(gWindow, IMG_Load("./IMAGES/evo.png"));
     init_agents();
     init_food();
     SDL_Thread* food_t = SDL_CreateThread(t_init_food, "food_t", (void *)NULL);
-    SDL_Thread* death_t = SDL_CreateThread(t_change_agent_status, "death_t", (void *)NULL);
 
     for (bool quit = false; quit == false; ) {
         while (SDL_PollEvent(&event)) {
@@ -72,11 +77,17 @@ int main (int argc, char* args[]) {
                     case SDLK_p:
                         agent[0].f_right = (!agent[0].f_right)*MAX_STRENGHT;
                         break;
-                    case SDLK_s:
-                        agent[0].rotation ++;
+                    case SDLK_j:
+                        agent[0].rotation++;
                         break;
-
+                    case SDLK_l:
+                        agent[0].rotation--;
+                        break;
+                    case SDLK_f:
+                        // TODO toggle fullscreen
+                        break;
                     case SDLK_SPACE:
+                        bite(0,1);
                         break;
                 }
             }
@@ -86,13 +97,8 @@ int main (int argc, char* args[]) {
         SDL_RenderClear(renderer);
         if (show_background)
             printworld();
-        input_agents();
         //give_agent_input(0);
-        execute_agents();
-        output_agents();
         update_world();
-        move_agents();
-        print_agents();
         SDL_RenderPresent(renderer);
         SDL_Delay(PAUSE_DELAY);
     }
@@ -101,5 +107,5 @@ int main (int argc, char* args[]) {
     gWindow = NULL;
     renderer = NULL;
     SDL_Quit();
-    return 0;
+    return EXIT_SUCCESS;
 }

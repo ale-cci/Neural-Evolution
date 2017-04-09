@@ -8,7 +8,7 @@
 #include "agent.h"
 
 double area[AREA_HEIGHT][AREA_WIDTH];
-int POPULATION_COUNT = START_POPULATION;
+int POPULATION_COUNT = 0;
 AGENT agent[MAX_POPULATION];
 int MEAT_COUNT = 0;
 COORD meat[MAX_MEAT];
@@ -41,15 +41,14 @@ void init_food() {
 }
 
 void init_agents() {
-    for (int i = 0; i < START_POPULATION; ++i) {
-        agent[i] = makeagent();
-        agent[i].brain.init();
+    while (POPULATION_COUNT < START_POPULATION) {
+        insert_random_agent();
     }
 }
 
 void print_agents() {
     for (int i=0; i < POPULATION_COUNT; ++i)
-        printagent(&agent[i]);
+        printagent(i);
 }
 
 void move_agents() {
@@ -57,7 +56,7 @@ void move_agents() {
         moveagent(i);
 }
 
-void input_agents() {
+void input_agents(){
     for (int i=0; i < POPULATION_COUNT; ++i)
         give_agent_input(i);
 }
@@ -76,25 +75,48 @@ void addfood() {
     int X = rand(0, AREA_WIDTH-1),
         Y = rand(0, AREA_HEIGHT-1);
     area[Y][X] = std::min(area[X][Y]+1,(double) MAX_FOOD_IN_AREA);
-
 }
 
+void reproduction() {
+    for (int i = POPULATION_COUNT -1; i >= 0; i--) {
+        if ((agent[i].food_bar >= FOOD_FOR_REPRODUCTION) && (POPULATION_COUNT < MAX_POPULATION -1)){
+            makeagent(POPULATION_COUNT);
+            agent[POPULATION_COUNT].food_category = agent[i].food_category;
+            agent[POPULATION_COUNT].brain = agent[POPULATION_COUNT].brain;
+            agent[POPULATION_COUNT].brain.mutate();
+            agent[i].food_bar = agent[i].food_bar / 3;
+            POPULATION_COUNT++;
+        }
+    }
+}
 void update_world() {
     // update the age
-    static time_t actualtime = time(NULL);
-    while(POPULATION_COUNT < MIN_POPULATION) {
-        insert_random_agent();
+    static uint64_t tick = time(NULL);
+    uint64_t now = time(NULL);
+
+    if (now - tick >= 1) {
+        tick = now;
+        check_agent_status();
     }
+    while (POPULATION_COUNT < MIN_POPULATION)
+        insert_random_agent();
+    input_agents();
+    execute_agents();
+    output_agents();
+    move_agents();
+    reproduction();
+    print_agents();
+    /*
+    static time_t actualtime = time(NULL);
 
     int ACTUAL_POPULATION = POPULATION_COUNT;
     for (int i=0; i < ACTUAL_POPULATION; ++i) {
         if ((agent[i].food_bar >= FOOD_FOR_REPRODUCTION) && (POPULATION_COUNT < MAX_POPULATION )){
             agent[i].food_bar = 0;
             if(POPULATION_COUNT < MAX_POPULATION -1) {
-                agent[POPULATION_COUNT] = makeagent();
-                agent[POPULATION_COUNT].food_category = agent[i].food_category + rand(-1.0, +1.0);
-                agent[POPULATION_COUNT].brain.init();
-                agent[POPULATION_COUNT].brain.inherit(&agent[i].brain);
+                makeagent(POPULATION_COUNT);
+                agent[POPULATION_COUNT].food_category = agent[i].food_category + rand(-1., +1.);
+                agent[POPULATION_COUNT].brain = agent[i].brain; // FIXME
                 agent[POPULATION_COUNT].brain.mutate();
                 POPULATION_COUNT++;
             }
@@ -105,32 +127,29 @@ void update_world() {
         actualtime = time(NULL);
         insert_random_agent();
     }
+    */
 }
 void insert_random_agent() {
     if (POPULATION_COUNT < MAX_POPULATION) {
-        agent[POPULATION_COUNT] = makeagent();
-        agent[POPULATION_COUNT].brain.init();
+        makeagent(POPULATION_COUNT);
         POPULATION_COUNT++;
     }
 }
-
-int t_change_agent_status(void* ) {
-    uint32_t delay = 1 * 1000;
-    while(1) {
-        for (int i=0; i < POPULATION_COUNT; ++i){
-            agent[i].energy = agent[i].energy - (1 + agent[i].boost_strenght);
-
-            if (agent[i].digesting)
-                agent[i].digesting--;
-            if (agent[i].energy <= 0) {
-                if (MEAT_COUNT < MAX_MEAT) {
-                    meat[MEAT_COUNT] = getcenter(&agent[i]);
-                    MEAT_COUNT++;
-                }
-                agent[i] = agent[POPULATION_COUNT-1];
-                POPULATION_COUNT--;
-            }
+void check_agent_status() {
+    for (int i=0; i < POPULATION_COUNT; ++i) {
+        agent[i].energy = agent[i].energy - (1 + agent[i].boost_strenght);
+        if ((agent[i].energy < MAX_HEALTH) && (agent[i].food_bar > 0)) {
+            double discard = std::min(agent[i].food_bar, 2.);
+            agent[i].food_bar -= discard;
+            agent[i].energy = bound(agent[i].energy + pow(discard, 2), 0, MAX_HEALTH);
         }
-        SDL_Delay(delay);
+        if (agent[i].energy <= 0 ) {
+            if (MEAT_COUNT < MAX_MEAT) {
+                meat[MEAT_COUNT] = getcenter(i);
+                MEAT_COUNT++;
+            }
+            kill(i);
+            i--;
+        }
     }
 }

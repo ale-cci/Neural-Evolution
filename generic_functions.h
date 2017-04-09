@@ -3,6 +3,7 @@
 
 
 const static double A = -6;
+extern std::string texture_path;
 
 typedef double _PRECISION;
 typedef float STRENGHT_PRECISION;

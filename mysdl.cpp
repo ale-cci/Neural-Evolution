@@ -17,7 +17,7 @@ bool init(std::string title) {
     gWindow = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL); // SDL_WINDOW_FULLSCREEN
     if (gWindow == NULL ) {
         warning("SDL WINDOW CREATION", SDL_GetError());
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     renderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
 

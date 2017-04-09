@@ -1,5 +1,6 @@
 #include "extmath.h"
 #include <cmath>
+#include <cassert>
 
 double delta(double A, double B, double C) {
     double solution = B*B - 4*A*C;
@@ -33,6 +34,10 @@ void line_circle_collision(double m_line, double q_line, double x_center, double
 double distance(COORD* A, COORD* B) {
     return sqrt(pow((A->X - B->X), 2) + pow((A->Y - B->Y), 2));
 }
+double distance(COORD A, COORD B) {
+    return sqrt(pow((A.X - B.X), 2) + pow(A.Y - B.Y, 2));
+}
+
 double mod360(double alpha) {
     return modX(alpha, 360.);
 }
@@ -41,6 +46,7 @@ double mod2PI(double alpha) {
     return modX(alpha, 2 * PI);
 }
 double modX(double alpha, double X) {
+    assert(X);
     int64_t delta = alpha / X;
     return alpha + (-delta + (alpha < 0)) * X;
 }
@@ -54,4 +60,12 @@ double sex_rad(const double alpha) {
 }
 double rad_sex(const double alpha) {
     return alpha * 180 / PI;
+}
+
+double bound(const double value, const double lower, const double upper) {
+    if (value <= lower)
+        return lower;
+    if (value >= upper)
+        return upper;
+    return value;
 }

@@ -3,7 +3,7 @@
 #include "mysdl.h"
 #include "extmath.h"
 #include "neural_network.h"
-
+#include "generic_agent.h"
 #define AGENT_HERBIVORE 0
 #define AGENT_CARNIVORE 1
 
@@ -27,31 +27,27 @@ struct AGENT {
     STRENGHT_PRECISION f_right;
     double boost_strenght;
     NEURAL_NETWORK brain;
-    uint16_t digesting;
     SDL_Color col;
+    void destroy();
+    AGENT& operator=(const AGENT& temp) noexcept;
 };
 
-void printagent(AGENT* agent);
 
 bool randomize_agent_positions();
 //bool randomize_agent_neural_network();
 
-AGENT makeagent();
 
-void moveagent(const uint16_t id);
-void give_agent_input(const uint16_t id);
-void execute_agent_input(const uint16_t id);
-void execute_agent_output(const uint16_t id);
 // erbivore function
 void crunch(const uint16_t id, const double strenght);
 void bite(const uint16_t id, const double strenght);
 
 int32_t getcellX(AGENT * _agent);
 int32_t getcellY(AGENT * _agent);
-int32_t smell(AGENT* _agent);
+int32_t smell(const uint16_t id);
 void food_sensor(const uint16_t id, double *distances);
-double blood_sensor(const uint16_t id, const double direction);
+void blood_sensor(const uint16_t id, double* sensors, double* distances);
 SDL_Color look(const uint16_t id,const double direction, const double alpha);
 void draw_sensor(const uint16_t id, double direction, double lenght, SDL_Color C);
+double dist_sensor(const uint16_t id, double direction, double lenght, COORD T);
 
-COORD getcenter(AGENT* _agent);
+COORD getcenter(const uint16_t id);

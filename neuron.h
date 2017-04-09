@@ -4,15 +4,19 @@
 #include "layer.h"
 
 struct NEURON {
-    int input_nums;
+    uint8_t layer_id;
     _PRECISION input_sum;
     _PRECISION prop_value; // precision value of the neuron
-    _PRECISION *synapsy;
+    _PRECISION *synapsis;
     void input(_PRECISION in);
-    void init(struct LAYER* nextlayer);
-    void execute(struct LAYER* nextlayer);
+    void init(const uint8_t layer_id);
+    void allocate(const uint8_t layer_id);
+    void execute(struct NEURON* nextlayer);
     void refresh();
-    void inherit_from(NEURON* father, LAYER* nextlayer);
-    void mutate(struct LAYER* nextlayer);
+    void duplicate(NEURON* father);
+    void mutate();
     double spread_value();
+    void destroy();
+
+    NEURON& operator=(const NEURON& target) noexcept;
 };
