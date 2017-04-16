@@ -7,13 +7,12 @@
 const static int SQUARE_SIZE = 32;
 const static int MAX_FOOD_IN_AREA =3;
 const static int PAUSE_DELAY    = 30;
-const static int MAX_POPULATION = 24; // 24
-const static int MAX_HEALTH     = 32;
+const static int MAX_POPULATION = 16; // 24
+const static uint16_t MAX_HEALTH     = 50;
 const static int START_POPULATION = 2;
-const static int MIN_POPULATION = 12; // 12
+const static int MIN_POPULATION = 8; // 12
 const static int AREA_WIDTH     = SCREEN_WIDTH / SQUARE_SIZE;
 const static int AREA_HEIGHT    = SCREEN_HEIGHT / SQUARE_SIZE;
-const static STRENGHT_PRECISION PROPULSOR_FORCE = 1;
 const static double FRICTION_CONSTANT = 1;
 const static double GRAVITY_CONSTANT = 9.81;
 const static double AGENT_SEEN_RADIUS = 96; /// 96
@@ -27,11 +26,11 @@ const static int CRUNCH_ENERGY = 0.;
 const static uint8_t VEGETABLE_DIGEST_TIME = 4;
 const static uint8_t MEAT_DIGEST_TIME  = 2;
 const static double CHANGING_FOOD_RATE = 0.8;
-const static double MAX_STRENGHT = 4;
+const static double MAX_STRENGHT = 2;
 const static double FOOD_FOR_REPRODUCTION = 40;
 const static int MAX_MEAT = MAX_POPULATION;
 const static float MAX_FOOD_CATEGORY = 2;
-const static uint16_t AGENT_BLOOD_RADIUS = 40;
+const static uint16_t AGENT_BLOOD_RADIUS = 120;
 const static uint16_t AGENT_GRASS_RADIUS = 90;
 const static uint8_t FOOD_SENSORS = 3;
 const static uint16_t MAX_FOOD_BAR = 100;
@@ -40,6 +39,11 @@ extern AGENT  agent[MAX_POPULATION];
 extern int POPULATION_COUNT;
 extern COORD meat[MAX_MEAT];
 extern int MEAT_COUNT;
+
+extern int32_t triggered;
+extern float   fast_forward;
+static int REAL_WIDTH;
+static int REAL_HEIGHT;
 
 int t_init_food(void* );
 void init_food();

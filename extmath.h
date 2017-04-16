@@ -1,5 +1,6 @@
 #pragma once
 #include <inttypes.h>
+#include <cmath>
 #define PI 3.14159265
 struct COORD {
     double X;
@@ -18,3 +19,7 @@ double getangle(double SIN, double COS);
 double sex_rad(const double alpha);
 double rad_sex(const double alpha);
 double bound(const double value, const double lower, const double upper);
+
+int rand(int LOWER, int UPPER);
+double rand(double LOWER, double UPPER);
+

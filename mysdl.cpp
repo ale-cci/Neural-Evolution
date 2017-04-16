@@ -1,12 +1,13 @@
 #include <SDL.h>
 #include <cstdlib> // for exit
+#include <cstdio>
 #include <string>
 #include "generic_functions.h"
 #include "mysdl.h"
 
 SDL_Window* gWindow = NULL;
 SDL_Renderer* renderer = NULL;
-
+TTF_Font* font;
 bool init(std::string title) {
     /*
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -16,11 +17,15 @@ bool init(std::string title) {
     */
     gWindow = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL); // SDL_WINDOW_FULLSCREEN
     if (gWindow == NULL ) {
-        warning("SDL WINDOW CREATION", SDL_GetError());
+        warning("SDL_INIT", SDL_GetError());
+        exit(EXIT_FAILURE);
+    }
+    if (TTF_Init()) {
+        warning("TTF_INIT", TTF_GetError());
         exit(EXIT_FAILURE);
     }
     renderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
-
+    font = TTF_OpenFont("FONT/cour.ttf" ,11);
     return EXIT_SUCCESS;
 }
 
@@ -76,4 +81,21 @@ SDL_Image* load_trsp(std::string PATH, SDL_Color C) {
     }
     SDL_FreeSurface(tmp);
     return &img;
+}
+
+bool write(const uint16_t Coord_X, const uint16_t Coord_Y, const char* STRING, ...) {
+    char _string[64];
+    va_list li;
+    va_start(li, STRING);
+    vsprintf(_string, STRING, li);
+    va_end(li);
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, _string, SDL_WHITE);
+    SDL_Texture* text = SDL_CreateTextureFromSurface(renderer, textSurface);
+    int text_width = textSurface->w;
+    int text_height = textSurface->h;
+    SDL_FreeSurface(textSurface);
+    SDL_Rect renderQuad = {Coord_X, Coord_Y, text_width, text_height};
+    SDL_RenderCopy(renderer, text, NULL, &renderQuad);
+    SDL_DestroyTexture(text);
+    return EXIT_SUCCESS;
 }

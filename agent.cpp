@@ -1,7 +1,9 @@
 #include <cstdlib>
 #include <cassert>
 #include <iostream>
+#include <fstream>
 #include <algorithm>
+#include <queue>
 #include <cmath>
 #include "generic_functions.h"
 #include "world.h"
@@ -12,21 +14,26 @@
 SDL_Image agent_texture;
 
 void makeagent(const uint16_t id) {
+    agent[id].age = 0;
     agent[id].energy = MAX_HEALTH;
     agent[id].food_category = rand(0, 1);
     agent[id].food_bar = 0;
     agent[id].rotation = rand(0,360);
     agent[id].f_left = 0;
     agent[id].f_right = 0;
+    agent[id].children = 0;
     agent[id].X = rand(agent_texture.width, SCREEN_WIDTH - agent_texture.width);
     agent[id].Y = rand(agent_texture.height, SCREEN_HEIGHT - agent_texture.height);
     agent[id].brain.init();
 }
 
 AGENT& AGENT::operator=(const AGENT& temp) noexcept {
+    assert(!std::isnan(temp.food_bar));
     energy = temp.energy;
     food_category = temp.food_category;
     food_bar = temp.food_bar;
+    age = temp.age;
+    children = temp.children;
     rotation = temp.rotation;
     f_left = temp.f_left;
     f_right = temp.f_right;
@@ -34,7 +41,6 @@ AGENT& AGENT::operator=(const AGENT& temp) noexcept {
     Y = temp.Y;
     boost_strenght = temp.boost_strenght;
     brain = temp.brain;
-    speed = temp.speed;
     return *this;
 }
 
@@ -54,24 +60,40 @@ bool agent_intersction(const uint16_t ID1, const uint16_t ID2) {
     COORD C2 = getcenter(ID2);
     return distance(&C1, &C2) < agent_texture.width;
 }
-void moveagent(const uint16_t ID) {
-    _PRECISION acceleration = 2*std::min(agent[ID].f_left, agent[ID].f_right) / AGENT_MASS;
-    acceleration *= (1 + agent[ID].boost_strenght);
-    _PRECISION moveX = -std::min(acceleration, MAX_SPEED)* sin(sex_rad(agent[ID].rotation));
-    _PRECISION moveY = +std::min(acceleration, MAX_SPEED)* cos(sex_rad(agent[ID].rotation));
 
-    agent[ID].X = agent[ID].X + moveX;
-    agent[ID].Y = agent[ID].Y - moveY;
-    agent[ID].rotation = mod360(agent[ID].rotation + rad_sex((agent[ID].f_right - agent[ID].f_left) / (agent_texture.width * AGENT_MASS)));
+_PRECISION getacceleration(const uint16_t id) {
+    if (agent[id].f_left * agent[id].f_right < 0)
+        return 0;
+    else
+    if (agent[id].f_left > 0)
+        return std::min(agent[id].f_left, agent[id].f_right);
+    else
+    if (agent[id].f_left < 0)
+        return std::max(agent[id].f_left, agent[id].f_right);
+    return 0;
+}
 
-    if (getcenter(ID).X < 0)
-        agent[ID].X = SCREEN_WIDTH -1 -AGENT_RADIUS;
-    if (getcenter(ID).Y < 0)
-        agent[ID].Y = SCREEN_HEIGHT -1 -AGENT_RADIUS;
-    if (getcenter(ID).X > SCREEN_WIDTH)
-        agent[ID].X = 0;
-    if (getcenter(ID).Y > SCREEN_HEIGHT)
-        agent[ID].Y = 0;
+_PRECISION getrotationforce(const uint16_t id) {
+    return agent[id].f_right - agent[id].f_left;
+}
+
+void moveagent(const uint16_t id) {
+    _PRECISION acceleration = getacceleration(id) + agent[id].boost_strenght;
+    _PRECISION moveX = -acceleration * MAX_SPEED* sin(sex_rad(agent[id].rotation));
+    _PRECISION moveY = +acceleration * MAX_SPEED* cos(sex_rad(agent[id].rotation));
+
+    agent[id].X = agent[id].X + moveX;
+    agent[id].Y = agent[id].Y - moveY;
+    agent[id].rotation = mod360(agent[id].rotation + rad_sex(getrotationforce(id) / (agent_texture.width * AGENT_MASS)));
+
+    if (getcenter(id).X < 0)
+        agent[id].X = SCREEN_WIDTH -1 - AGENT_RADIUS;
+    if (getcenter(id).Y < 0)
+        agent[id].Y = SCREEN_HEIGHT -1 -agent_texture.height;
+    if (getcenter(id).X > SCREEN_WIDTH)
+        agent[id].X = 0;
+    if (getcenter(id).Y > SCREEN_HEIGHT)
+        agent[id].Y = 0;
     //agnt->speed = acceleration + agnt->speed;
     //agnt->boost_strenght -= distance;
 
@@ -106,28 +128,54 @@ void blood_sensor(const uint16_t ID, _PRECISION* sensors, _PRECISION* distances)
 
         ++i;
     }while (i < POPULATION_COUNT);
+    Min = getcenter(target_id);
     for (i = 0; i < FOOD_SENSORS; ++i) {
         _PRECISION direction = sex_rad(sensors[i]);
         draw_sensor(ID, direction, AGENT_BLOOD_RADIUS, food_color(ID));
         COORD Sensor = {P.X + AGENT_BLOOD_RADIUS*cos(direction), P.Y - AGENT_BLOOD_RADIUS*sin(direction) };
-        distances[i] = std::min(distance(&Min, &Sensor) / AGENT_BLOOD_RADIUS, 1.);
+        distances[i] = std::min(distance(&Min, &Sensor), double(AGENT_BLOOD_RADIUS));
     }
     return ;
 }
+uint32_t max_food_radius(const uint16_t id) {
+    switch(agent[id].food_category) {
+        case AGENT_HERBIVORE:
+            return AGENT_GRASS_RADIUS;
+        case AGENT_CARNIVORE:
+            return AGENT_BLOOD_RADIUS;
+        default:
+            assert(0 && "agent food category not defineds");
+    }
+}
+// TODO update with bfs
 void grass_sensor(const uint16_t ID, _PRECISION sensor[3], _PRECISION distances[3]) {
-    COORD near = {0, 0};
+
+    /*
+    std::queue<uint16_t> qu;
+    qu.push();
+
+    while(qu.size()) {
+        auto first = qu.front();
+        qu.pop();
+        for(;;)
+            if()
+                qu.push();
+    }
+
+    //*/
+    COORD nearest = {0, 0};
 
     for (int y = 0; y < AREA_HEIGHT; ++y)
         for (int x = 0; x < AREA_WIDTH; ++x)
             if (int(area[y][x]) > 0)
-                if (distance(near, getcenter(ID)) > distance({x + SQUARE_SIZE/2., y + SQUARE_SIZE/2.}, getcenter(ID))) {
-                    near.X = x + SQUARE_SIZE/2;
-                    near.Y = y + SQUARE_SIZE/2;
+                if (distance(nearest, getcenter(ID)) > distance({(x+0.5)*SQUARE_SIZE, (y+0.5)*SQUARE_SIZE}, getcenter(ID))) {
+                    nearest.X = (x + 0.5)*SQUARE_SIZE;
+                    nearest.Y = (y + 0.5) *SQUARE_SIZE;
                 }
     for (int i=0; i < 3; ++i) {
         _PRECISION direction = sex_rad(sensor[i]);
         draw_sensor(ID, direction, AGENT_GRASS_RADIUS, SDL_GREEN);
-        distances[i] = std::min(uint16_t(dist_sensor(ID, direction, AGENT_GRASS_RADIUS, near)), AGENT_GRASS_RADIUS);
+        distances[i] = std::min(uint16_t(dist_sensor(ID, direction, AGENT_GRASS_RADIUS, nearest)), AGENT_GRASS_RADIUS);
     }
     return;
 }
@@ -161,16 +209,16 @@ void bite(const uint16_t id, const _PRECISION strenght) {
     COORD P = getcenter(id);
     #ifdef DEBUG
     draw_sensor(id, direction, AGENT_BITE_RADIUS, SDL_PINK);
-    #endif // DEBUG
+    #endif
 
     for (int i = 0; i <POPULATION_COUNT; ++i) {
         _PRECISION act_dist = distance(getcenter(i), getcenter(id));
         if (i == id)
             continue;
-        if (act_dist - agent_texture.width / 2 > min_dist)
+        if (act_dist - AGENT_RADIUS > min_dist)
             continue;
         COORD T = getcenter(i);
-        _PRECISION add = mod2PI(asin((agent_texture.width / 2) / sqrt(pow(act_dist, 2) + pow(agent_texture.width/2, 2))));
+        _PRECISION add = mod2PI(asin((AGENT_RADIUS) / sqrt(pow(act_dist, 2) + pow(AGENT_RADIUS, 2))));
         _PRECISION angle = getangle((P.Y-T.Y) /act_dist, (T.X - P.X)/act_dist);
         _PRECISION a1 = mod2PI(direction - add);
         _PRECISION a2 = mod2PI(direction + add);
@@ -192,8 +240,8 @@ void bite(const uint16_t id, const _PRECISION strenght) {
     return ;
 }
 
-bool in_agent(COORD P, AGENT* _agent) {
-    return pow((P.X - _agent->X), 2) + pow((P.Y - _agent->Y), 2) <= pow(agent_texture.width/2, 2);
+bool in_agent(COORD P, const uint16_t id) {
+    return pow((P.X - getcenter(id).X), 2) + pow((P.Y - getcenter(id).Y), 2) <= pow(AGENT_RADIUS, 2);
 }
 
 
@@ -220,7 +268,7 @@ SDL_Color look(const uint16_t id, const _PRECISION direction, const _PRECISION a
         COORD T = getcenter(i) ;
         _PRECISION act_dist = distance(&P, &T);
 
-        if (act_dist  - agent_texture.width / 2< middle.a){
+        if (act_dist  - AGENT_RADIUS< middle.a){
             angle = getangle((P.Y-T.Y) /act_dist, (T.X - P.X)/act_dist) ;//modX(asin(abs(T.Y - P.Y) / distance(&P, &T)), 2*PI);
             _PRECISION add = mod2PI(asin((agent_texture.width/2) / sqrt(pow(act_dist, 2) + pow(agent_texture.width / 2, 2))));
             _PRECISION ang4 = mod2PI(ang1 + add);
@@ -250,16 +298,10 @@ _PRECISION dist_sensor(const uint16_t id, _PRECISION direction, _PRECISION lengh
 }
 
 int32_t smell(const uint16_t id) {
-    COORD center1  = getcenter(id);
-    COORD center2;
     int32_t neightbours = 0;
-    for (int i=0; i < POPULATION_COUNT; ++i) {
-        center2 = getcenter(id);
-        if ( distance(&center1, &center2 ) <= AGENT_SEEN_RADIUS + agent_texture.width);
+    for (int i=0; i < POPULATION_COUNT; ++i)
+        if ( distance(getcenter(id), getcenter(i) ) <= AGENT_SEEN_RADIUS + agent_texture.width)
             ++neightbours;
-
-
-    }
     return neightbours;
 }
 
@@ -273,18 +315,20 @@ void give_agent_input(const uint16_t id) {
     _PRECISION neightbours_number = _PRECISION(smell(id)) / MAX_POPULATION;
 
     _PRECISION inputs[INPUT_CELLS] = {
-        food_distances[0],
-        food_distances[1],
-        food_distances[2],
+        double(food_distances[0]) / max_food_radius(id),
+        double(food_distances[1]) / max_food_radius(id),
+        double(food_distances[2]) / max_food_radius(id),
         eye1.r / 255.,
-        1 - _PRECISION(eye1.a) / AGENT_SEEN_RADIUS,
+        _PRECISION(eye1.a) / AGENT_SEEN_RADIUS,
         eye2.r / 255.,
-        1 - _PRECISION(eye2.a) / AGENT_SEEN_RADIUS,
+        _PRECISION(eye2.a) / AGENT_SEEN_RADIUS,
         eye3.r / 255.,
-        1 - _PRECISION(eye3.a) / AGENT_SEEN_RADIUS,
-        health,
+        _PRECISION(eye3.a) / AGENT_SEEN_RADIUS,
         neightbours_number,
+        agent[id].food_bar / MAX_FOOD_BAR,
+        health,
     };
+
     agent[id].brain.input(inputs);
 }
 
@@ -296,17 +340,57 @@ void execute_agent_input(const uint16_t id) {
 void execute_agent_output(const uint16_t id) {
     agent[id].brain.output(id);
 }
+
 void AGENT::destroy() {
+    age = 0;
     brain.destroy();
     X = 0;
     Y = 0;
     energy = 0;
     rotation = 0;
-    speed = 0;
     food_bar = 0;
     food_category = 0;
     f_left = 0;
     f_right = 0;
     boost_strenght = 0;
-    col = {0,0,0,0};
+    col = {0, 0, 0, 0};
+}
+
+void AGENT::write(std::ofstream& out) {
+    out.write((char*) &age, sizeof(age));
+    out.write((char*) &children, sizeof(children));
+    out.write((char*) &X, sizeof(X));
+    out.write((char*) &Y, sizeof(Y));
+    out.write((char*) &energy, sizeof(energy));
+    out.write((char*) &rotation, sizeof(rotation));
+    out.write((char*) &food_bar, sizeof(food_bar));
+    out.write((char*) &food_category, sizeof(food_category));
+    out.write((char*) &f_left, sizeof(f_left));
+    out.write((char*) &f_right, sizeof(f_right));
+    out.write((char*) &boost_strenght, sizeof(boost_strenght));
+    out.write((char*) &col.r, sizeof(col.r));
+    out.write((char*) &col.g, sizeof(col.g));
+    out.write((char*) &col.b, sizeof(col.b));
+    out.write((char*) &col.a, sizeof(col.a));
+    brain.write(out);
+
+}
+
+void AGENT::read(std::ifstream& in) {
+    in.read((char*) &age, sizeof(age));
+    in.read((char*) &children, sizeof(children));
+    in.read((char*) &X, sizeof(X));
+    in.read((char*) &Y, sizeof(Y));
+    in.read((char*) &energy, sizeof(energy));
+    in.read((char*) &rotation, sizeof(rotation));
+    in.read((char*) &food_bar, sizeof(food_bar));
+    in.read((char*) &food_category, sizeof(food_category));
+    in.read((char*) &f_left, sizeof(f_left));
+    in.read((char*) &f_right, sizeof(f_right));
+    in.read((char*) &boost_strenght, sizeof(boost_strenght));
+    in.read((char*) &col.r, sizeof(col.r));
+    in.read((char*) &col.g, sizeof(col.g));
+    in.read((char*) &col.b, sizeof(col.b));
+    in.read((char*) &col.a, sizeof(col.a));
+    brain.read(in);
 }

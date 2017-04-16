@@ -1,7 +1,12 @@
 #include <cstdlib>
+#include <cmath>
 #include <ctime>
+#include <cassert>
 #include <iostream>
 #include <algorithm>
+
+#include <cstdio>
+
 #include "generic_functions.h"
 #include "world.h"
 #include "mysdl.h"
@@ -12,6 +17,10 @@ int POPULATION_COUNT = 0;
 AGENT agent[MAX_POPULATION];
 int MEAT_COUNT = 0;
 COORD meat[MAX_MEAT];
+int32_t triggered = -1;
+uint8_t printoutput = false;
+float fast_forward = 1;
+
 
 void printworld() {
     // print background color;
@@ -25,14 +34,7 @@ void printworld() {
             SDL_RenderFillRect(renderer, &rekt);
         }
 }
-int t_init_food(void* args) {
-    uint32_t delay = 1 * 1000;
-    while(1) {
-        addfood();
-        SDL_Delay(delay);
-    }
-    return 0;
-}
+
 void init_food() {
     for (int y = 0; y < AREA_HEIGHT; ++y)
             for (int x = 0; x < AREA_WIDTH; ++x)
@@ -47,28 +49,48 @@ void init_agents() {
 }
 
 void print_agents() {
-    for (int i=0; i < POPULATION_COUNT; ++i)
+    for (int i=0; i < POPULATION_COUNT; ++i) {
+        #ifdef DEBUG
+        assert(!std::isnan(agent[i].food_bar));
+        #endif
         printagent(i);
+    }
 }
 
 void move_agents() {
-    for (int i=0; i < POPULATION_COUNT; ++i)
+    for (int i=0; i < POPULATION_COUNT; ++i) {
+        #ifdef DEBUG
+        assert(!std::isnan(agent[i].food_bar));
+        #endif
         moveagent(i);
+    }
 }
 
 void input_agents(){
-    for (int i=0; i < POPULATION_COUNT; ++i)
+    for (int i=0; i < POPULATION_COUNT; ++i) {
+        #ifdef DEBUG
+        assert(!std::isnan(agent[i].food_bar));
+        #endif
         give_agent_input(i);
+    }
 }
 
 void execute_agents() {
-    for (int i=0; i < POPULATION_COUNT; ++i)
-       execute_agent_input(i);
+    for (int i=0; i < POPULATION_COUNT; ++i) {
+        #ifdef DEBUG
+        assert(!std::isnan(agent[i].food_bar));
+        #endif
+        execute_agent_input(i);
+    }
 }
 
 void output_agents() {
-    for (int i=0; i < POPULATION_COUNT; ++i)
+    for (int i=0; i < POPULATION_COUNT; ++i) {
+        #ifdef DEBUG
+        assert(!std::isnan(agent[i].food_bar));
+        #endif
         execute_agent_output(i);
+    }
 }
 
 void addfood() {
@@ -78,71 +100,84 @@ void addfood() {
 }
 
 void reproduction() {
-    for (int i = POPULATION_COUNT -1; i >= 0; i--) {
-        if ((agent[i].food_bar >= FOOD_FOR_REPRODUCTION) && (POPULATION_COUNT < MAX_POPULATION -1)){
-            makeagent(POPULATION_COUNT);
-            agent[POPULATION_COUNT].food_category = agent[i].food_category;
-            agent[POPULATION_COUNT].brain = agent[POPULATION_COUNT].brain;
-            agent[POPULATION_COUNT].brain.mutate();
-            agent[i].food_bar = agent[i].food_bar / 3;
-            POPULATION_COUNT++;
+
+    for (int i = POPULATION_COUNT -1; (i >= 0) && (POPULATION_COUNT < MAX_POPULATION-1); i--) {
+        agent[i].age++;
+        if(agent[i].age / (agent[i].children+1) >= average_death()) {
+            insert_random_agent();
+            agent[POPULATION_COUNT-1].food_category = agent[i].food_category;
+            agent[POPULATION_COUNT-1].brain = agent[i].brain;
+            agent[POPULATION_COUNT-1].brain.mutate();
+            agent[i].children++;
         }
     }
 }
 void update_world() {
     // update the age
-    static uint64_t tick = time(NULL);
-    uint64_t now = time(NULL);
+    static uint64_t clock1 = 0;
+    static uint64_t clock2 = 0;
 
-    if (now - tick >= 1) {
-        tick = now;
+    uint64_t tick = clock();
+
+    if (tick - clock1 >= 1000*(1./fast_forward)) {
+        clock1 = tick;
+        addfood();
         check_agent_status();
+        reproduction();
     }
+
+    if (tick - clock2 >= 10000*(1./fast_forward)) {
+        insert_random_agent();
+        clock2 = tick;
+    }
+
     while (POPULATION_COUNT < MIN_POPULATION)
         insert_random_agent();
     input_agents();
     execute_agents();
     output_agents();
     move_agents();
-    reproduction();
     print_agents();
-    /*
-    static time_t actualtime = time(NULL);
+    const uint32_t START_X = SCREEN_WIDTH -120;
+    const uint32_t START_Y = 50;
+    const uint32_t SPACE   = 10;
 
-    int ACTUAL_POPULATION = POPULATION_COUNT;
-    for (int i=0; i < ACTUAL_POPULATION; ++i) {
-        if ((agent[i].food_bar >= FOOD_FOR_REPRODUCTION) && (POPULATION_COUNT < MAX_POPULATION )){
-            agent[i].food_bar = 0;
-            if(POPULATION_COUNT < MAX_POPULATION -1) {
-                makeagent(POPULATION_COUNT);
-                agent[POPULATION_COUNT].food_category = agent[i].food_category + rand(-1., +1.);
-                agent[POPULATION_COUNT].brain = agent[i].brain; // FIXME
-                agent[POPULATION_COUNT].brain.mutate();
-                POPULATION_COUNT++;
-            }
-        }
-    }
+    write(START_X, 20, "MAX_POPUL.: %d", MAX_POPULATION);
+    write(START_X, 30, "POPULATION: %d", POPULATION_COUNT);
+    write(START_X, 40, "FAST_FRWRD: %.1fx", fast_forward);
+    if (triggered != -1) {
+        write(START_X, START_Y + SPACE*1, "ID:   %d", triggered);
+        write(START_X, START_Y + SPACE*2, "AGE:  %d", agent[triggered].age);
+        write(START_X, START_Y + SPACE*3, "HLTH: %f", agent[triggered].energy);
+        write(START_X, START_Y + SPACE*4, "FOOD: %f", agent[triggered].food_bar);
+        write(START_X, START_Y + SPACE*5, "F_LF: %f", agent[triggered].f_left / MAX_STRENGHT);
+        write(START_X, START_Y + SPACE*6, "F_RG: %f", agent[triggered].f_right / MAX_STRENGHT);
 
-    if ((((time(NULL) - actualtime) % (20 +1)) == 0) && (time(NULL) != actualtime)) {   // create random agent each N second
-        actualtime = time(NULL);
-        insert_random_agent();
     }
-    */
+    else
+        write(START_X, START_Y + SPACE*1, "NOTHING SELECTED");
 }
+
 void insert_random_agent() {
-    if (POPULATION_COUNT < MAX_POPULATION) {
-        makeagent(POPULATION_COUNT);
-        POPULATION_COUNT++;
+    if (POPULATION_COUNT < MAX_POPULATION){
+        makeagent(POPULATION_COUNT++);
     }
 }
+// 0 <= out <= 1
+double food_lost(double x) {
+    return pow((2 * x - 3 /2) , 2) / (4 * MAX_HEALTH -3);
+}
+
 void check_agent_status() {
     for (int i=0; i < POPULATION_COUNT; ++i) {
-        agent[i].energy = agent[i].energy - (1 + agent[i].boost_strenght);
+        agent[i].energy = agent[i].energy - (1 + (food_lost(agent[i].energy)*0.60 + abs(agent[i].boost_strenght)*0.40 *((agent[i].food_category == AGENT_CARNIVORE)?0.5:1)));
+
         if ((agent[i].energy < MAX_HEALTH) && (agent[i].food_bar > 0)) {
-            double discard = std::min(agent[i].food_bar, 2.);
-            agent[i].food_bar -= discard;
-            agent[i].energy = bound(agent[i].energy + pow(discard, 2), 0, MAX_HEALTH);
+            double discard = std::min(agent[i].food_bar, 1.);
+            agent[i].food_bar = bound(agent[i].food_bar- discard*2, 0, MAX_FOOD_BAR);
+            agent[i].energy = bound(agent[i].energy + discard, 0, MAX_HEALTH);
         }
+
         if (agent[i].energy <= 0 ) {
             if (MEAT_COUNT < MAX_MEAT) {
                 meat[MEAT_COUNT] = getcenter(i);

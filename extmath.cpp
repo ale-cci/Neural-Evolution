@@ -1,5 +1,6 @@
 #include "extmath.h"
 #include <cmath>
+#include <algorithm>
 #include <cassert>
 
 double delta(double A, double B, double C) {
@@ -68,4 +69,19 @@ double bound(const double value, const double lower, const double upper) {
     if (value >= upper)
         return upper;
     return value;
+}
+
+int rand(int LOWER, int UPPER) {
+    assert(UPPER - LOWER +1 > 0);
+
+    if (LOWER > UPPER)
+        std::swap(LOWER, UPPER);
+    return (rand() % (UPPER - LOWER + 1 )) + LOWER;
+}
+
+double rand(double LOWER, double UPPER) {
+    if (LOWER > UPPER)
+        std::swap(LOWER, UPPER);
+    double _ret = (double) rand() / RAND_MAX;
+    return _ret * (UPPER - LOWER) + LOWER;
 }
