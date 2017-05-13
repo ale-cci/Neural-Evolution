@@ -32,3 +32,22 @@ void firstfree(char* filename, const char* _string) {
         strcpy(filename, tempstring);
     in.close();
 }
+
+/*
+void getext(char* str, const char* filename) {
+    str = NULL;
+    uint8_t len = 0;
+    uint8_t point_pos = 0;
+
+    for (len = 0; filename[len]; ++len)
+        if (len == 255) {
+            str[0] = 0;
+            return ;
+        }
+    ;
+    for (;len > 0; len--) {
+        if (filename[len] == '.')
+            break; // /
+    }
+}
+*/

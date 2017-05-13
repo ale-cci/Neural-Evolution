@@ -96,11 +96,12 @@ void moveagent(const uint16_t id) {
         agent[id].Y = 0;
     //agnt->speed = acceleration + agnt->speed;
     //agnt->boost_strenght -= distance;
-
 }
+
 int32_t getcellX(const uint16_t ID) {
     return getcenter(ID).X / SQUARE_SIZE;
 }
+
 int32_t getcellY(const uint16_t ID) {
     return getcenter(ID).Y / SQUARE_SIZE;
 }
@@ -327,6 +328,7 @@ void give_agent_input(const uint16_t id) {
         neightbours_number,
         agent[id].food_bar / MAX_FOOD_BAR,
         health,
+        1/(agent[id].age+1.),
     };
 
     agent[id].brain.input(inputs);

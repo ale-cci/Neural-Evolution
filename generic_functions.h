@@ -11,4 +11,6 @@ void printagent(struct AGENT * _agent);
 void warning(std::string id, std::string msg, ...);
 
 double special_one(double input);
-void  firstfree(char* str, const char* message);
+void firstfree(char* str, const char* message);
+
+void getext(char* str, const char* filename);

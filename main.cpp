@@ -28,6 +28,8 @@ int main (int argc, char* args[]) {
 
     agent_texture = *load_trsp(texture_path.c_str());
     agent_texture.width = AGENT_RADIUS *2;
+    agent_texture.height = AGENT_RADIUS *2;
+
     SDL_SetWindowIcon(gWindow, IMG_Load("./IMAGES/evo.png"));
     init_agents();
     init_food();
@@ -119,7 +121,7 @@ int main (int argc, char* args[]) {
                             if (triggered == -1)
                                 break;
                             char filename[64];
-                            firstfree(filename, "agent%d.agt");
+                            firstfree(filename, "AGENTS/agent%d.agt");
                             warning("MAIN", filename);
                             std::ofstream out(filename, std::ios::binary);
                             agent[triggered].write(out);
@@ -160,7 +162,7 @@ int main (int argc, char* args[]) {
             }
         }
         // rederer background color
-        SDL_SetRenderDrawColor(renderer, 38, 38, 38, 255);
+        SDL_SetRenderDrawColor(renderer, 45, 45, 45, 255);
         SDL_RenderClear(renderer);
         if (show_background)
             printworld();

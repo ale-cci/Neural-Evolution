@@ -1,24 +1,29 @@
 #include <cmath>
 #include <cassert>
 #include "generic_agent.h"
-uint8_t lastdeath[16];
+
+uint8_t lastdeath[NUMBER_OF_SPECIES][LAST_DEATH_NUMBER];
+uint16_t cnt_deaths[NUMBER_OF_SPECIES];
 
 void init_lastdeath() {
-    for (int i =0; i < 16; ++i)
-        lastdeath[i] = MAX_HEALTH*3/5;
+    for (int y =0; y < NUMBER_OF_SPECIES; ++y)
+        for (int x =0; x < LAST_DEATH_NUMBER; ++x)
+            lastdeath[y][x] = MAX_HEALTH*3/5;
 }
 
-void add_death(uint8_t age) {
-    static uint8_t position = 0;
-    position = (position + 1) % 16;
-    lastdeath[position] = age;
+void add_death(const uint16_t id) {
+    assert(agent[id].food_category < NUMBER_OF_SPECIES);
+    auto position = cnt_deaths[agent[id].food_category];
+    lastdeath[agent[id].food_category][position] = agent[id].age;
+    position = (position + 1) % LAST_DEATH_NUMBER;
+    cnt_deaths[agent[id].food_category] = position;
 }
 
-uint8_t average_death() {
-    uint8_t sum = 0;
-    for (int i=0; i < 16; ++i)
-        sum += lastdeath[i];
-    return sum / 16;
+double average_death(const uint8_t species) {
+    double sum = 0;
+    for (int i=0; i < LAST_DEATH_NUMBER; ++i)
+        sum += lastdeath[species][i];
+    return sum / LAST_DEATH_NUMBER;
 }
 
 void kill(const uint16_t id) {
@@ -27,7 +32,7 @@ void kill(const uint16_t id) {
     else
     if (POPULATION_COUNT -1 == triggered)
         triggered = id;
-    add_death(agent[id].age);
+    add_death(id);
     agent[id]  = agent[POPULATION_COUNT -1];
     agent[POPULATION_COUNT -1].destroy();
     POPULATION_COUNT--;

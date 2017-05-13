@@ -103,7 +103,7 @@ void reproduction() {
 
     for (int i = POPULATION_COUNT -1; (i >= 0) && (POPULATION_COUNT < MAX_POPULATION-1); i--) {
         agent[i].age++;
-        if(agent[i].age / (agent[i].children+1) >= average_death()) {
+        if(agent[i].age / (agent[i].children+1) >= average_death(agent[i].food_category)) {
             insert_random_agent();
             agent[POPULATION_COUNT-1].food_category = agent[i].food_category;
             agent[POPULATION_COUNT-1].brain = agent[i].brain;
@@ -138,20 +138,24 @@ void update_world() {
     output_agents();
     move_agents();
     print_agents();
-    const uint32_t START_X = SCREEN_WIDTH -120;
-    const uint32_t START_Y = 50;
+    const uint32_t START_X = SCREEN_WIDTH -140;
+    const uint32_t START_Y = 70;
     const uint32_t SPACE   = 10;
 
     write(START_X, 20, "MAX_POPUL.: %d", MAX_POPULATION);
     write(START_X, 30, "POPULATION: %d", POPULATION_COUNT);
     write(START_X, 40, "FAST_FRWRD: %.1fx", fast_forward);
+    write(START_X, 50, "AVG_HERBIV: %.2f", average_death(AGENT_HERBIVORE));
+    write(START_X, 60, "AVG_CARNIV: %.2f", average_death(AGENT_CARNIVORE));
+
     if (triggered != -1) {
         write(START_X, START_Y + SPACE*1, "ID:   %d", triggered);
         write(START_X, START_Y + SPACE*2, "AGE:  %d", agent[triggered].age);
         write(START_X, START_Y + SPACE*3, "HLTH: %f", agent[triggered].energy);
         write(START_X, START_Y + SPACE*4, "FOOD: %f", agent[triggered].food_bar);
-        write(START_X, START_Y + SPACE*5, "F_LF: %f", agent[triggered].f_left / MAX_STRENGHT);
-        write(START_X, START_Y + SPACE*6, "F_RG: %f", agent[triggered].f_right / MAX_STRENGHT);
+        write(START_X, START_Y + SPACE*5, "B.ST: %f", agent[triggered].boost_strenght);
+        write(START_X, START_Y + SPACE*6, "F_LF: %f", agent[triggered].f_left / MAX_STRENGHT);
+        write(START_X, START_Y + SPACE*7, "F_RG: %f", agent[triggered].f_right / MAX_STRENGHT);
 
     }
     else
@@ -163,19 +167,30 @@ void insert_random_agent() {
         makeagent(POPULATION_COUNT++);
     }
 }
-// 0 <= out <= 1
-double food_lost(double x) {
-    return pow((2 * x - 3 /2) , 2) / (4 * MAX_HEALTH -3);
+double age_handicap(const uint16_t id) {
+    const uint64_t x = agent[id].age;
+    return 1./(1 + exp((6. - x)));
+}
+
+double food_lost(const uint16_t id) {
+    const double x = agent[id].food_bar / MAX_FOOD_BAR;
+    return (2.914 * pow(x, 2) - 3.414 * x +1);
+}
+
+double boost_lost(const uint16_t id) {
+    const double x = agent[id].boost_strenght;
+    const float disc = ((agent[id].food_category == AGENT_CARNIVORE)?0.5:1);
+    return pow(x, 2) * disc;
 }
 
 void check_agent_status() {
     for (int i=0; i < POPULATION_COUNT; ++i) {
-        agent[i].energy = agent[i].energy - (1 + (food_lost(agent[i].energy)*0.60 + abs(agent[i].boost_strenght)*0.40 *((agent[i].food_category == AGENT_CARNIVORE)?0.5:1)));
+        agent[i].energy = agent[i].energy - (1 + (food_lost(i) + boost_lost(i))*age_handicap(i));
 
         if ((agent[i].energy < MAX_HEALTH) && (agent[i].food_bar > 0)) {
             double discard = std::min(agent[i].food_bar, 1.);
-            agent[i].food_bar = bound(agent[i].food_bar- discard*2, 0, MAX_FOOD_BAR);
-            agent[i].energy = bound(agent[i].energy + discard, 0, MAX_HEALTH);
+            agent[i].food_bar = bound(agent[i].food_bar - sqrt(discard), 0, MAX_FOOD_BAR);
+            agent[i].energy = bound(agent[i].energy + pow(discard, 2), 0, MAX_HEALTH);
         }
 
         if (agent[i].energy <= 0 ) {
