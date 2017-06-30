@@ -50,7 +50,7 @@ SDL_Color food_color(const uint16_t id) {
             return SDL_GREEN;
             break;
         case AGENT_CARNIVORE:
-            return SDL_BLUE;
+            return SDL_RED;
             break;
     }
     return SDL_WHITE;
@@ -255,8 +255,8 @@ SDL_Color look(const uint16_t id, const _PRECISION direction, const _PRECISION a
 
     _PRECISION ang1 = direction + alpha/2;
     _PRECISION ang2 = direction - alpha/2;
-    draw_sensor(id, ang1, AGENT_SEEN_RADIUS, SDL_RED);
-    draw_sensor(id, ang2, AGENT_SEEN_RADIUS, SDL_RED);
+   // draw_sensor(id, ang1, AGENT_SEEN_RADIUS, SDL_RED);
+   // draw_sensor(id, ang2, AGENT_SEEN_RADIUS, SDL_RED);
 
     _PRECISION angle = 255;
     ang1 = mod2PI(ang1);

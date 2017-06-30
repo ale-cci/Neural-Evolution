@@ -23,7 +23,7 @@ void printagent(const uint16_t id) {
     if (id == triggered)
         SDL_SetRenderDrawColor(renderer, 0, 0xff, 0xff, 0);
     else
-        SDL_SetRenderDrawColor(renderer, 218, 22, 58, 0);
+        SDL_SetRenderDrawColor(renderer, 246, 172, 0, 0);
     for (int y = -agent_texture.width/2; y <= agent_texture.width/2; ++y)
         for (int x = -agent_texture.width/2; x <= agent_texture.width/2; ++x)
             if ((x * x + y*y <= agent_texture.width * agent_texture.width / 4) && (x * x + y*y >= (agent_texture.width -2)*(agent_texture.width-2)/ 4))
