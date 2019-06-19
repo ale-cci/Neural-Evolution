@@ -2,13 +2,13 @@
 
 Working Progress
 
-# REQUIREMENTS:
+### REQUIREMENTS:
 
 * SDL2
 * SDL2\_Image
 * SDL2\_ttf
 
-# BUILD AND RUN:
+### BUILD AND RUN:
 
 ```
 make && ./all
