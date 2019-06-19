@@ -2,13 +2,13 @@
 
 Working Progress
 
-### REQUIREMENTS:
+### Extermal dependencies:
 
 * SDL2
 * SDL2\_Image
 * SDL2\_ttf
 
-### BUILD AND RUN:
+### Build And Run:
 
 ```
 make && ./all
@@ -16,3 +16,4 @@ make && ./all
 
 ### TODO:
 * README
+* Code Clenaup

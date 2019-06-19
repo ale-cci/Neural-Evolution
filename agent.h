@@ -10,7 +10,6 @@
 #define LAST_DEATH_NUMBER 16
 
 const static double AGENT_MASS     = 1.;
-
 const static int    AGENT_RED      = 0; // 235
 const static int    AGENT_GREEN    = 206;
 const static int    AGENT_BLUE     = 209;
@@ -20,7 +19,8 @@ extern SDL_Image agent_texture;
 extern uint8_t lastdeath[2][LAST_DEATH_NUMBER];
 extern uint16_t cnt_deaths[NUMBER_OF_SPECIES];
 
-struct AGENT {
+class AGENT {
+public:
     uint64_t age;
     double X;
     double Y;
@@ -40,9 +40,9 @@ struct AGENT {
     void read(std::ifstream& in);
 
     AGENT& operator=(const AGENT& temp) noexcept;
-
 };
 
+void init_lastdeath();
 
 bool randomize_agent_positions();
 //bool randomize_agent_neural_network();
@@ -63,4 +63,3 @@ uint32_t max_food_radius(const uint16_t id);
 COORD getcenter(const uint16_t id);
 double average_death(const uint8_t species);
 void add_death(uint8_t age);
-void init_lastdeath();

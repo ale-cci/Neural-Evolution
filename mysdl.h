@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <string>
+
 #define SDL_YELLOW  {0xff, 0xff, 0, 0}
 #define SDL_RED     {0xff, 0, 0, 0}
 #define SDL_BLUE    {0, 0, 0xff, 0}

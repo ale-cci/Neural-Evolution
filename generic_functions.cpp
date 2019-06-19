@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <fstream>
 #include "extmath.h"
+
 /*
 
 double special_one(double input) {
@@ -20,17 +21,19 @@ double special_one(double input) {
 
 
 void firstfree(char* filename, const char* _string) {
+    /* First free filename */
     std::ifstream in;
     char tempstring[64];
+
     for (int64_t i=0; i < 128; ++i) {
         sprintf(tempstring, _string, i);
         in.open(tempstring);
-        if (in.fail())
+        if (in.fail()) {
+            strcpy(filename, tempstring);
             break;
+        }
+        in.close();
     }
-    if (in.fail())
-        strcpy(filename, tempstring);
-    in.close();
 }
 
 /*

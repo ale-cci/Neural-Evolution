@@ -34,6 +34,7 @@ const static uint16_t AGENT_BLOOD_RADIUS = 120;
 const static uint16_t AGENT_GRASS_RADIUS = 90;
 const static uint8_t FOOD_SENSORS = 3;
 const static uint16_t MAX_FOOD_BAR = 100;
+
 extern double area[AREA_HEIGHT][AREA_WIDTH];
 extern AGENT  agent[MAX_POPULATION];
 extern int POPULATION_COUNT;

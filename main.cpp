@@ -2,32 +2,36 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+
 #include <time.h>
-// #include <conio.h>
 #include <iostream>
 #include <fstream>
 #include <cassert>
 #include <cstdlib>
 
+#include "lib/logger.h"
 #include "mysdl.h"
 #include "world.h"
 #include "generic_functions.h"
 
+
+
 int main(int argc, char* args[]) {
     time_t seed = 1492250131;// time(NULL);
-    srand(seed);
     uint32_t status = 0;
     uint8_t togglefullscreen = true;
-    std::cout << "SEED" << " " << seed << std::endl;
     bool show_background = false;
     SDL_Event event;
 
+    srand(seed);
+    logger::log(logger::INFO, "main(): Generated seed %d\n", seed);
+
     if (init("EVOLUTION SIMULATOR")) {
-        warning ("MAIN THREAD", "error on initializing, terminating process");
+        logger::log(logger::CRITICAL, "init(): Error during initialization, breaking execution\n");
         return EXIT_FAILURE;
     }
 
-    agent_texture = *load_trsp(texture_path.c_str());
+    agent_texture = *load_trsp(texture_path.c_str()); /* FIXME: Memory leak */
     agent_texture.width = AGENT_RADIUS *2;
     agent_texture.height = AGENT_RADIUS *2;
 
@@ -35,7 +39,9 @@ int main(int argc, char* args[]) {
     init_agents();
     init_food();
     init_lastdeath();
+
     for (bool quit = false; quit == false; ) {
+        /* Processing User Input */
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT)
                 quit = true;
@@ -162,6 +168,8 @@ int main(int argc, char* args[]) {
                 }
             }
         }
+
+        /* Rendering */
         // rederer background color
         SDL_SetRenderDrawColor(renderer, 45, 45, 45, 255);
         SDL_RenderClear(renderer);
@@ -170,13 +178,13 @@ int main(int argc, char* args[]) {
         //give_agent_input(0);
         update_world();
         SDL_RenderPresent(renderer);
+
+        /* TODO: Frames control */
         SDL_Delay(PAUSE_DELAY * (1/fast_forward));
     }
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(gWindow);
-    gWindow = NULL;
-    renderer = NULL;
     SDL_Quit();
     TTF_Quit();
     return EXIT_SUCCESS;

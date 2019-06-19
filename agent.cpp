@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <queue>
 #include <cmath>
+
 #include "generic_functions.h"
 #include "world.h"
 #include "mysdl.h"
@@ -148,22 +149,8 @@ uint32_t max_food_radius(const uint16_t id) {
             assert(0 && "agent food category not defineds");
     }
 }
-// TODO update with bfs
+
 void grass_sensor(const uint16_t ID, _PRECISION sensor[3], _PRECISION distances[3]) {
-
-    /*
-    std::queue<uint16_t> qu;
-    qu.push();
-
-    while(qu.size()) {
-        auto first = qu.front();
-        qu.pop();
-        for(;;)
-            if()
-                qu.push();
-    }
-
-    //*/
     COORD nearest = {0, 0};
 
     for (int y = 0; y < AREA_HEIGHT; ++y)
@@ -180,6 +167,7 @@ void grass_sensor(const uint16_t ID, _PRECISION sensor[3], _PRECISION distances[
     }
     return;
 }
+
 void food_sensor(const uint16_t id, _PRECISION distances[3]) {
     // find the nearest source of food and returns the distances from the sensors
     _PRECISION sensors[3] = {61, 119, 270};
@@ -375,7 +363,6 @@ void AGENT::write(std::ofstream& out) {
     out.write((char*) &col.b, sizeof(col.b));
     out.write((char*) &col.a, sizeof(col.a));
     brain.write(out);
-
 }
 
 void AGENT::read(std::ifstream& in) {
