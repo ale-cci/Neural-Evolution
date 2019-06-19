@@ -1,6 +1,18 @@
 # Neural-Evolution
 
-Recently i've found a little bug in this project.
+Working Progress
 
-### Coming Soon:
-* Bug fixes
+# REQUIREMENTS:
+
+* SDL2
+* SDL2\_Image
+* SDL2\_ttf
+
+# BUILD AND RUN:
+
+```
+make && ./all
+```
+
+### TODO:
+* README
