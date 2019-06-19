@@ -1,4 +1,4 @@
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <cstdlib> // for exit
 #include <cstdio>
 #include <string>
@@ -9,12 +9,10 @@ SDL_Window* gWindow = NULL;
 SDL_Renderer* renderer = NULL;
 TTF_Font* font;
 bool init(std::string title) {
-    /*
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         warning("SDL INITIALIZATION", SDL_GetError());
         return EXIT_FAILURE;
     }
-    */
     gWindow = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL); // SDL_WINDOW_FULLSCREEN
     if (gWindow == NULL ) {
         warning("SDL_INIT", SDL_GetError());
@@ -24,7 +22,7 @@ bool init(std::string title) {
         warning("TTF_INIT", TTF_GetError());
         exit(EXIT_FAILURE);
     }
-    renderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_SOFTWARE);
     font = TTF_OpenFont("FONT/cour.ttf" ,11);
     return EXIT_SUCCESS;
 }
@@ -62,7 +60,7 @@ void SDL_DestroyImage(SDL_Image* IMAGE) {
 }
 
 SDL_Image* load_trsp(std::string PATH, SDL_Color C) {
-    SDL_Image img;
+    SDL_Image* img = new SDL_Image;
     SDL_Surface* tmp = SDL_LoadBMP(PATH.c_str());
     if (tmp == NULL) {
         std::string errmsg = std::string("") + "error while opening: " + PATH.c_str();
@@ -71,16 +69,16 @@ SDL_Image* load_trsp(std::string PATH, SDL_Color C) {
     }
     SDL_SetColorKey(tmp, SDL_TRUE, SDL_MapRGB(tmp->format, C.r, C.g, C.b));
 
-    img.texture = SDL_CreateTextureFromSurface(renderer, tmp);
-    img.width = tmp->w;
-    img.height = tmp->h;
+    img->texture = SDL_CreateTextureFromSurface(renderer, tmp);
+    img->width = tmp->w;
+    img->height = tmp->h;
 
-    if (img.texture == NULL) {
+    if (img->texture == NULL) {
         warning("LOAD_TRASP", "error converting surface to texture");
         exit(1);
     }
     SDL_FreeSurface(tmp);
-    return &img;
+    return img;
 }
 
 bool write(const uint16_t Coord_X, const uint16_t Coord_Y, const char* STRING, ...) {

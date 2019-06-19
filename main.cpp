@@ -1,18 +1,19 @@
 ///http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-1-introduction-to-rnns/
 
-#include <SDL.h>
-#include <SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <time.h>
-#include <conio.h>
+// #include <conio.h>
 #include <iostream>
 #include <fstream>
 #include <cassert>
 #include <cstdlib>
+
 #include "mysdl.h"
 #include "world.h"
 #include "generic_functions.h"
 
-int main (int argc, char* args[]) {
+int main(int argc, char* args[]) {
     time_t seed = 1492250131;// time(NULL);
     srand(seed);
     uint32_t status = 0;
