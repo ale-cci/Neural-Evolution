@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __GENERIC_AGENT_H__
+#define __GENERIC_AGENT_H__
+
 #include <inttypes.h>
 #include "world.h"
 
@@ -10,3 +12,5 @@ void moveagent(const uint16_t id);
 void give_agent_input(const uint16_t id);
 void execute_agent_input(const uint16_t id);
 void execute_agent_output(const uint16_t id);
+
+#endif

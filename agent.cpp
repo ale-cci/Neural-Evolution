@@ -28,7 +28,7 @@ void makeagent(const uint16_t id) {
     agent[id].brain.init();
 }
 
-AGENT& AGENT::operator=(const AGENT& temp) noexcept {
+Agent& Agent::operator=(const Agent& temp) noexcept {
     assert(!std::isnan(temp.food_bar));
     energy = temp.energy;
     food_category = temp.food_category;
@@ -320,6 +320,7 @@ void give_agent_input(const uint16_t id) {
     };
 
     agent[id].brain.input(inputs);
+    // auto outputs = agent[id].brain2.feed_forward(inputs);
 }
 
 
@@ -329,9 +330,10 @@ void execute_agent_input(const uint16_t id) {
 
 void execute_agent_output(const uint16_t id) {
     agent[id].brain.output(id);
+    // Assign left and right and boost strength
 }
 
-void AGENT::destroy() {
+void Agent::destroy() {
     age = 0;
     brain.destroy();
     X = 0;
@@ -346,7 +348,7 @@ void AGENT::destroy() {
     col = {0, 0, 0, 0};
 }
 
-void AGENT::write(std::ofstream& out) {
+void Agent::write(std::ofstream& out) {
     out.write((char*) &age, sizeof(age));
     out.write((char*) &children, sizeof(children));
     out.write((char*) &X, sizeof(X));
@@ -365,7 +367,7 @@ void AGENT::write(std::ofstream& out) {
     brain.write(out);
 }
 
-void AGENT::read(std::ifstream& in) {
+void Agent::read(std::ifstream& in) {
     in.read((char*) &age, sizeof(age));
     in.read((char*) &children, sizeof(children));
     in.read((char*) &X, sizeof(X));

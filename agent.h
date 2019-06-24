@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __AGENT_H__
+#define __AGENT_H__
 #include <inttypes.h>
 #include "mysdl.h"
 #include "extmath.h"
@@ -19,7 +20,7 @@ extern SDL_Image agent_texture;
 extern uint8_t lastdeath[2][LAST_DEATH_NUMBER];
 extern uint16_t cnt_deaths[NUMBER_OF_SPECIES];
 
-class AGENT {
+class Agent {
 public:
     uint64_t age;
     double X;
@@ -39,7 +40,7 @@ public:
     void write(std::ofstream& out);
     void read(std::ifstream& in);
 
-    AGENT& operator=(const AGENT& temp) noexcept;
+    Agent& operator=(const Agent& temp) noexcept;
 };
 
 void init_lastdeath();
@@ -63,3 +64,4 @@ uint32_t max_food_radius(const uint16_t id);
 COORD getcenter(const uint16_t id);
 double average_death(const uint8_t species);
 void add_death(uint8_t age);
+#endif

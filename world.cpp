@@ -14,7 +14,7 @@
 
 double area[AREA_HEIGHT][AREA_WIDTH];
 int POPULATION_COUNT = 0;
-AGENT agent[MAX_POPULATION];
+Agent agent[MAX_POPULATION];
 int MEAT_COUNT = 0;
 COORD meat[MAX_MEAT];
 int32_t triggered = -1;
