@@ -195,7 +195,7 @@ void check_agent_status() {
 
         if (agent[i].energy <= 0 ) {
             if (MEAT_COUNT < MAX_MEAT) {
-                meat[MEAT_COUNT] = getcenter(i);
+                meat[MEAT_COUNT] = agent[i].center();
                 MEAT_COUNT++;
             }
             kill(i);

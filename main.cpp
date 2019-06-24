@@ -36,6 +36,7 @@ int main(int argc, char* args[]) {
     agent_texture.height = AGENT_RADIUS *2;
 
     SDL_SetWindowIcon(gWindow, IMG_Load("./IMAGES/evo.png"));
+
     init_agents();
     init_food();
     init_lastdeath();

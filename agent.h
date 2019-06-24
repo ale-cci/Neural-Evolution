@@ -21,6 +21,7 @@ extern uint8_t lastdeath[2][LAST_DEATH_NUMBER];
 extern uint16_t cnt_deaths[NUMBER_OF_SPECIES];
 
 class Agent {
+    // static SDL_Image* texture; // TODO: load texture from here
 public:
     uint64_t age;
     double X;
@@ -41,6 +42,7 @@ public:
     void read(std::ifstream& in);
 
     Agent& operator=(const Agent& temp) noexcept;
+    COORD center();
 };
 
 void init_lastdeath();

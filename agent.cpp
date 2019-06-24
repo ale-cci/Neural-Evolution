@@ -57,8 +57,8 @@ SDL_Color food_color(const uint16_t id) {
     return SDL_WHITE;
 }
 bool agent_intersction(const uint16_t ID1, const uint16_t ID2) {
-    COORD C1 = getcenter(ID1);
-    COORD C2 = getcenter(ID2);
+    COORD C1 = agent[ID1].center();
+    COORD C2 = agent[ID2].center();
     return distance(&C1, &C2) < agent_texture.width;
 }
 
@@ -87,24 +87,24 @@ void moveagent(const uint16_t id) {
     agent[id].Y = agent[id].Y - moveY;
     agent[id].rotation = mod360(agent[id].rotation + rad_sex(getrotationforce(id) / (agent_texture.width * AGENT_MASS)));
 
-    if (getcenter(id).X < 0)
+    if (agent[id].center().X < 0)
         agent[id].X = SCREEN_WIDTH -1 - AGENT_RADIUS;
-    if (getcenter(id).Y < 0)
+    if (agent[id].center().Y < 0)
         agent[id].Y = SCREEN_HEIGHT -1 -agent_texture.height;
-    if (getcenter(id).X > SCREEN_WIDTH)
+    if (agent[id].center().X > SCREEN_WIDTH)
         agent[id].X = 0;
-    if (getcenter(id).Y > SCREEN_HEIGHT)
+    if (agent[id].center().Y > SCREEN_HEIGHT)
         agent[id].Y = 0;
     //agnt->speed = acceleration + agnt->speed;
     //agnt->boost_strenght -= distance;
 }
 
 int32_t getcellX(const uint16_t ID) {
-    return getcenter(ID).X / SQUARE_SIZE;
+    return agent[ID].center().X / SQUARE_SIZE;
 }
 
 int32_t getcellY(const uint16_t ID) {
-    return getcenter(ID).Y / SQUARE_SIZE;
+    return agent[ID].center().Y / SQUARE_SIZE;
 }
 
 void crunch(const uint16_t id, const _PRECISION strenght) {
@@ -121,16 +121,16 @@ void crunch(const uint16_t id, const _PRECISION strenght) {
 
 void blood_sensor(const uint16_t ID, _PRECISION* sensors, _PRECISION* distances) {
     uint16_t target_id = ID^1;
-    COORD P = getcenter(ID);
+    COORD P = agent[ID].center();
     COORD Min;
     uint16_t i = 0;
     do{
-        if ((i != ID) && (distance(getcenter(i), P) < distance(getcenter(target_id), P)))
+        if ((i != ID) && (distance(agent[i].center(), P) < distance(agent[target_id].center(), P)))
             target_id = i;
 
         ++i;
     }while (i < POPULATION_COUNT);
-    Min = getcenter(target_id);
+    Min = agent[target_id].center();
     for (i = 0; i < FOOD_SENSORS; ++i) {
         _PRECISION direction = sex_rad(sensors[i]);
         draw_sensor(ID, direction, AGENT_BLOOD_RADIUS, food_color(ID));
@@ -156,7 +156,7 @@ void grass_sensor(const uint16_t ID, _PRECISION sensor[3], _PRECISION distances[
     for (int y = 0; y < AREA_HEIGHT; ++y)
         for (int x = 0; x < AREA_WIDTH; ++x)
             if (int(area[y][x]) > 0)
-                if (distance(nearest, getcenter(ID)) > distance({(x+0.5)*SQUARE_SIZE, (y+0.5)*SQUARE_SIZE}, getcenter(ID))) {
+                if (distance(nearest, agent[ID].center()) > distance({(x+0.5)*SQUARE_SIZE, (y+0.5)*SQUARE_SIZE}, agent[ID].center())) {
                     nearest.X = (x + 0.5)*SQUARE_SIZE;
                     nearest.Y = (y + 0.5) *SQUARE_SIZE;
                 }
@@ -195,18 +195,18 @@ void bite(const uint16_t id, const _PRECISION strenght) {
     _PRECISION min_dist = AGENT_BITE_RADIUS;
     _PRECISION direction = sex_rad(agent[id].rotation + 90);
 
-    COORD P = getcenter(id);
+    COORD P = agent[id].center();
     #ifdef DEBUG
     draw_sensor(id, direction, AGENT_BITE_RADIUS, SDL_PINK);
     #endif
 
     for (int i = 0; i <POPULATION_COUNT; ++i) {
-        _PRECISION act_dist = distance(getcenter(i), getcenter(id));
+        _PRECISION act_dist = distance(agent[i].center(), agent[id].center());
         if (i == id)
             continue;
         if (act_dist - AGENT_RADIUS > min_dist)
             continue;
-        COORD T = getcenter(i);
+        COORD T = agent[i].center();
         _PRECISION add = mod2PI(asin((AGENT_RADIUS) / sqrt(pow(act_dist, 2) + pow(AGENT_RADIUS, 2))));
         _PRECISION angle = getangle((P.Y-T.Y) /act_dist, (T.X - P.X)/act_dist);
         _PRECISION a1 = mod2PI(direction - add);
@@ -230,15 +230,16 @@ void bite(const uint16_t id, const _PRECISION strenght) {
 }
 
 bool in_agent(COORD P, const uint16_t id) {
-    return pow((P.X - getcenter(id).X), 2) + pow((P.Y - getcenter(id).Y), 2) <= pow(AGENT_RADIUS, 2);
+    return pow((P.X - agent[id].center().X), 2) + pow((P.Y - agent[id].center().Y), 2) <= pow(AGENT_RADIUS, 2);
 }
 
 
-COORD getcenter(const uint16_t ID) {
-    return {agent[ID].X + agent_texture.width/2, agent[ID].Y + agent_texture.height/2};
+COORD Agent::center() {
+    return {X + agent_texture.width/2, Y + agent_texture.height/2};
 }
+
 SDL_Color look(const uint16_t id, const _PRECISION direction, const _PRECISION alpha) {
-    COORD P = getcenter(id);
+    COORD P = agent[id].center();
     SDL_Color middle = {0, 0, 0, AGENT_SEEN_RADIUS};
 
     _PRECISION ang1 = direction + alpha/2;
@@ -254,7 +255,7 @@ SDL_Color look(const uint16_t id, const _PRECISION direction, const _PRECISION a
         if (i == id )
             continue;
 
-        COORD T = getcenter(i) ;
+        COORD T = agent[i].center() ;
         _PRECISION act_dist = distance(&P, &T);
 
         if (act_dist  - AGENT_RADIUS< middle.a){
@@ -274,14 +275,14 @@ SDL_Color look(const uint16_t id, const _PRECISION direction, const _PRECISION a
 }
 
 void draw_sensor(const uint16_t id, _PRECISION direction, _PRECISION lenght, SDL_Color C) {
-    COORD P = getcenter(id);
+    COORD P = agent[id].center();
     COORD T = {P.X + lenght * cos(direction), P.Y - lenght * sin(direction)};
     SDL_SetRenderDrawColor(renderer, C.r, C.g, C.b, C.a);
     SDL_RenderDrawLine(renderer, P.X, P.Y, T.X, T.Y);
 }
 
 _PRECISION dist_sensor(const uint16_t id, _PRECISION direction, _PRECISION lenght, COORD T) {
-    COORD P = getcenter(id);
+    COORD P = agent[id].center();
     COORD E = {P.X + lenght * cos(direction), P.Y - lenght * sin(direction)};
     return distance(T, E);
 }
@@ -289,7 +290,7 @@ _PRECISION dist_sensor(const uint16_t id, _PRECISION direction, _PRECISION lengh
 int32_t smell(const uint16_t id) {
     int32_t neightbours = 0;
     for (int i=0; i < POPULATION_COUNT; ++i)
-        if ( distance(getcenter(id), getcenter(i) ) <= AGENT_SEEN_RADIUS + agent_texture.width)
+        if ( distance(agent[id].center(), agent[i].center() ) <= AGENT_SEEN_RADIUS + agent_texture.width)
             ++neightbours;
     return neightbours;
 }

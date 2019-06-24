@@ -27,7 +27,7 @@ void printagent(const uint16_t id) {
     for (int y = -agent_texture.width/2; y <= agent_texture.width/2; ++y)
         for (int x = -agent_texture.width/2; x <= agent_texture.width/2; ++x)
             if ((x * x + y*y <= agent_texture.width * agent_texture.width / 4) && (x * x + y*y >= (agent_texture.width -2)*(agent_texture.width-2)/ 4))
-                SDL_RenderDrawPoint(renderer, int(getcenter(id).X + x) % (SCREEN_WIDTH-1), int(getcenter(id).Y + y) % (SCREEN_HEIGHT-1));
+                SDL_RenderDrawPoint(renderer, int(agent[id].center().X + x) % (SCREEN_WIDTH-1), int(agent[id].center().Y + y) % (SCREEN_HEIGHT-1));
 
     SDL_Rect rekt;
     rekt.h = agent_texture.height+1;
@@ -35,6 +35,6 @@ void printagent(const uint16_t id) {
     rekt.x = agent[id].X;
     rekt.y = agent[id].Y;
 
-    SDL_Point p = {getcenter(id).X, getcenter(id).Y};
+    SDL_Point p = {agent[id].center().X, agent[id].center().Y};
     //SDL_RenderCopyEx(renderer, agent_texture.texture, NULL, &rekt, -agent[id].rotation, NULL, SDL_FLIP_NONE);
 }
