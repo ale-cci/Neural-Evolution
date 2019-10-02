@@ -6,14 +6,6 @@
 
 std::string texture_path = "IMAGES/debug01.bmp";
 
-void warning(std::string id, std::string msg, ...) {
-    va_list li;
-    va_start (li, msg);
-    vprintf(std::string(id + " " + msg + "\n").c_str(), li);
-    va_end(li);
-    return ;
-}
-
 void printagent(const uint16_t id) {
     write(agent[id].X -5, agent[id].Y-3, "%d", id);
     SDL_SetRenderDrawColor(renderer, 0, 0xff, 0, 0);

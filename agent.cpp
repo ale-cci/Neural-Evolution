@@ -6,6 +6,7 @@
 #include <queue>
 #include <cmath>
 
+
 #include "generic_functions.h"
 #include "world.h"
 #include "mysdl.h"
@@ -15,6 +16,7 @@
 SDL_Image agent_texture;
 
 void makeagent(const uint16_t id) {
+    // TODO: move to Agent::Agent
     agent[id].age = 0;
     agent[id].energy = MAX_HEALTH;
     agent[id].food_category = rand(0, 1);
@@ -87,6 +89,7 @@ void moveagent(const uint16_t id) {
     agent[id].Y = agent[id].Y - moveY;
     agent[id].rotation = mod360(agent[id].rotation + rad_sex(getrotationforce(id) / (agent_texture.width * AGENT_MASS)));
 
+    // TODO: Remove ''Wraparound'' Behaviour
     if (agent[id].center().X < 0)
         agent[id].X = SCREEN_WIDTH -1 - AGENT_RADIUS;
     if (agent[id].center().Y < 0)
@@ -99,18 +102,10 @@ void moveagent(const uint16_t id) {
     //agnt->boost_strenght -= distance;
 }
 
-int32_t getcellX(const uint16_t ID) {
-    return agent[ID].center().X / SQUARE_SIZE;
-}
-
-int32_t getcellY(const uint16_t ID) {
-    return agent[ID].center().Y / SQUARE_SIZE;
-}
-
 void crunch(const uint16_t id, const _PRECISION strenght) {
     agent[id].energy -= CRUNCH_ENERGY * strenght;
-    int32_t cellX = getcellX(id);
-    int32_t cellY = getcellY(id);
+    int32_t cellX = agent[id].center().X / SQUARE_SIZE;
+    int32_t cellY = agent[id].center().Y / SQUARE_SIZE;
     if (area[cellY][cellX] > 0) {
         area[cellY][cellX] -= strenght;
         if (area[cellY][cellX] < 0)
@@ -189,6 +184,7 @@ void food_sensor(const uint16_t id, _PRECISION distances[3]) {
 }
 
 void bite(const uint16_t id, const _PRECISION strenght) {
+    // TODO: Move to Agent::bite
     agent[id].energy -= BITE_ENERGY * strenght;
 
     int16_t nearest = -1;
@@ -230,6 +226,7 @@ void bite(const uint16_t id, const _PRECISION strenght) {
 }
 
 bool in_agent(COORD P, const uint16_t id) {
+    // Move to Agent::contains(point)
     return pow((P.X - agent[id].center().X), 2) + pow((P.Y - agent[id].center().Y), 2) <= pow(AGENT_RADIUS, 2);
 }
 
@@ -275,6 +272,7 @@ SDL_Color look(const uint16_t id, const _PRECISION direction, const _PRECISION a
 }
 
 void draw_sensor(const uint16_t id, _PRECISION direction, _PRECISION lenght, SDL_Color C) {
+    // TODO: move to Agent::draw
     COORD P = agent[id].center();
     COORD T = {P.X + lenght * cos(direction), P.Y - lenght * sin(direction)};
     SDL_SetRenderDrawColor(renderer, C.r, C.g, C.b, C.a);

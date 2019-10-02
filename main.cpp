@@ -6,7 +6,7 @@
 #include <time.h>
 #include <iostream>
 #include <fstream>
-#include <cassert>
+// #include <cassert>
 #include <cstdlib>
 
 #include "lib/logger.h"
@@ -26,7 +26,7 @@ int main(int argc, char* args[]) {
     srand(seed);
     logger::log(logger::INFO, "main(): Generated seed %d\n", seed);
 
-    if (init("EVOLUTION SIMULATOR")) {
+    if (init("Evolution Simulator")) {
         logger::log(logger::CRITICAL, "init(): Error during initialization, breaking execution\n");
         return EXIT_FAILURE;
     }
@@ -130,7 +130,8 @@ int main(int argc, char* args[]) {
                                 break;
                             char filename[64];
                             firstfree(filename, "AGENTS/agent%d.agt");
-                            warning("MAIN", filename);
+
+                            logger::log(logger::WARNING, "main() %s\n", filename);
                             std::ofstream out(filename, std::ios::binary);
                             agent[triggered].write(out);
                             out.close();

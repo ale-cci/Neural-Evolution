@@ -12,6 +12,7 @@ void init_lastdeath() {
 }
 
 void add_death(const uint16_t id) {
+    /* Log death of agent id */
     assert(agent[id].food_category < NUMBER_OF_SPECIES);
     auto position = cnt_deaths[agent[id].food_category];
     lastdeath[agent[id].food_category][position] = agent[id].age;
@@ -32,6 +33,7 @@ void kill(const uint16_t id) {
     else
     if (POPULATION_COUNT -1 == triggered)
         triggered = id;
+
     add_death(id);
     agent[id]  = agent[POPULATION_COUNT -1];
     agent[POPULATION_COUNT -1].destroy();

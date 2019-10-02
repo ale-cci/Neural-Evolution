@@ -13,7 +13,7 @@ TTF_Font* font;
 
 bool init(std::string title) {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-        warning("SDL INITIALIZATION", SDL_GetError());
+        logger::log(logger::ERROR, "SDL_INITIALIZATION: %s\n", SDL_GetError());
         return EXIT_FAILURE;
     }
     gWindow = SDL_CreateWindow(

@@ -5,9 +5,8 @@
 #include "extmath.h"
 #include "neural_network.h"
 #include "generic_agent.h"
-#define AGENT_HERBIVORE 0
-#define AGENT_CARNIVORE 1
-#define NUMBER_OF_SPECIES 2
+
+enum{AGENT_HERBIVORE, AGENT_CARNIVORE, NUMBER_OF_SPECIES};
 #define LAST_DEATH_NUMBER 16
 
 const static double AGENT_MASS     = 1.;
@@ -24,8 +23,9 @@ class Agent {
     // static SDL_Image* texture; // TODO: load texture from here
 public:
     uint64_t age;
-    double X;
-    double Y;
+
+    float X, Y;
+
     double energy;
     double rotation;
     double food_bar;

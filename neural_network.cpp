@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cmath>
 #include "world.h"
+#include "lib/logger.h"
 
 void NEURAL_NETWORK::input(_PRECISION *in) {
     refresh();
@@ -39,7 +40,7 @@ void NEURAL_NETWORK::output(const uint16_t id) {
     agent[id].boost_strenght = 1 + last_output[3];
 }
 void NEURAL_NETWORK::init() {
-    warning("INIT_NEURAL_NETWORK", "Initializing...");
+    logger::log(logger::INFO, "INIT_NEURAL_NETWORK: Initializing...\n");
     input_layer.init(0);
     for (int i=0; i < NUMBER_OF_LAYERS; ++i)
         hidden_layer[i].init(i+1);
@@ -47,7 +48,7 @@ void NEURAL_NETWORK::init() {
 }
 
 void NEURAL_NETWORK::destroy() {
-    warning("NEURAL_NETWORK_DESTROY", "Deallocating...");
+    logger::log(logger::DEBUG, "NEURAL_NETWORK_DESTROY: Deallocating...\n");
     input_layer.destroy();
     for (int i=0; i < NUMBER_OF_LAYERS; ++i)
         hidden_layer[i].destroy();
